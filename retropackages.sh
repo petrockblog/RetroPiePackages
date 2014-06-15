@@ -137,11 +137,11 @@ import "scriptmodules/supplementary"
 # rp_registerFunction "" "" "" "" "" "" ""
 
 # Emulators
-rp_registerFunction "100" "RetroArch Emulator             " "sources_retroarch" "build_retroarch" "install_retroarch" "configure_retroarch" "package_retroarch"
+rp_registerFunction "100" "RetroArch Emulator             " "sources_retroarch"       "build_retroarch"         "install_retroarch"         "configure_retroarch"       ""
 
 # LibretroCores functions
-rp_registerFunction "200" "SNES LibretroCore PocketSNES   " "sources_pocketsnes" "build_pocketsnes" "install_pocketsnes" "configure_pocketsnes" "package_pocketsnes"
-rp_registerFunction "201" "Genesis LibretroCore Picodrive " "sources_picodrive"  "build_picodrive"  "install_picodrive"  "configure_picodrive"  "package_picodrive"
+rp_registerFunction "200" "SNES LibretroCore PocketSNES   " "sources_pocketsnes"       "build_pocketsnes"       "install_pocketsnes"        "configure_pocketsnes"      ""
+rp_registerFunction "201" "Genesis LibretroCore Picodrive " "sources_picodrive"        "build_picodrive"        "install_picodrive"         "configure_picodrive"       ""
 
 # Supplementary functions
 rp_registerFunction "300" "Package Repository             " ""                         ""                       "install_PackageRepository" "" ""
