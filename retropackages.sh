@@ -9,7 +9,7 @@ __install=()
 __configure=()
 __package=()
 
-prefix="/opt/retropie"
+rootdir="/opt/retropie"
 
 function getScriptAbsoluteDir() {
     # @description used to get the script path
@@ -92,7 +92,7 @@ function rp_registerFunction() {
 function rp_listFunctions() {
 	local id
 
-    echo -e "Command-ID: Description:\tList of available actions"
+    echo -e "Command-ID: Description:\tList of available actions [sources|build|install|configure|package]"
     echo "--------------------------------------------------"
 	for (( i = 0; i < ${#__cmdid[@]}; i++ )); do
 		id=${__cmdid[$i]};
@@ -110,17 +110,17 @@ function rp_listFunctions() {
 function rp_printUsageinfo() {
     echo -e "Usage information:\nCall retropackages.sh in the following way:\n./retropackages.sh <ID>\nThis will run the actions sources, build, install, configure, and package automatically.\n"
     echo -e "Alternatively, retropackages.sh can be called as\n./retropackages.sh <ID> [sources|build|install|configure|package]\n"
-    echo -e "These commands are known by the script:\n"
+    echo -e "This is a list of valid commands:\n"
     rp_listFunctions
 }
 
 # -------------------------------------------------------------
 
 # check, if sudo is used
-if [ $(id -u) -ne 0 ]; then
-    printf "Script must be run as root. Try 'sudo ./retropackages'\n"
-    exit 1
-fi   
+# if [ $(id -u) -ne 0 ]; then
+#     printf "Script must be run as root. Try 'sudo ./retropackages'\n"
+#     exit 1
+# fi   
 
 # load script modules
 script_invoke_path="$0"
@@ -129,16 +129,23 @@ getScriptAbsoluteDir "$script_invoke_path"
 script_absolute_dir=$RESULT
 home=$(eval echo ~$user)
 import "scriptmodules/helpers"
+import "scriptmodules/emulators"
+import "scriptmodules/libretrocores"
 import "scriptmodules/supplementary"
 
 # register script functions
-# 1XX Emulators
-# 2XX RetroArch cores
-# 3XX Supplementary Components
-
 # rp_registerFunction "" "" "" "" "" "" ""
-rp_registerFunction "300" "Package Repository" "" "" "install_PackageRepository" "" ""
-rp_registerFunction "301" "EmulationStation" "sources_EmulationStation" "build_EmulationStation" "install_EmulationStation" "configure_EmulationStation" "package_EmulationStation"
+
+# Emulators
+rp_registerFunction "100" "RetroArch Emulator             " "sources_retroarch" "build_retroarch" "install_retroarch" "configure_retroarch" "package_retroarch"
+
+# LibretroCores functions
+rp_registerFunction "200" "SNES LibretroCore PocketSNES   " "sources_pocketsnes" "build_pocketsnes" "install_pocketsnes" "configure_pocketsnes" "package_pocketsnes"
+rp_registerFunction "201" "Genesis LibretroCore Picodrive " "sources_picodrive"  "build_picodrive"  "install_picodrive"  "configure_picodrive"  "package_picodrive"
+
+# Supplementary functions
+rp_registerFunction "300" "Package Repository             " ""                         ""                       "install_PackageRepository" "" ""
+rp_registerFunction "301" "EmulationStation               " "sources_EmulationStation" "build_EmulationStation" "install_EmulationStation" "configure_EmulationStation" "package_EmulationStation"
 
 # ID mode
 if [[ $# -eq 1 ]]; then

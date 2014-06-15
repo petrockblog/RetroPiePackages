@@ -1,0 +1,58 @@
+# Picodrive -----------------------------
+
+function sources_picodrive() {
+    printMsg "Getting sources for Megadrive core Picodrive"
+    gitPullOrClone "$rootdir/emulatorcores/picodrive" https://github.com/libretro/picodrive.git
+    git submodule init && git submodule update
+}
+
+function build_picodrive() {
+    printMsg "Building Megadrive core picodrive"
+    make clean
+    make -f Makefile.libretro platform=armv6    
+    if [[ ! -f `find $rootdir/emulatorcores/picodrive/ -name "*libretro*.so"` ]]; then
+        __ERRMSGS="$__ERRMSGS Could not successfully compile Genesis core Picodrive."
+    fi      
+    popd
+}
+
+function install_picodrive() {
+    printMsg "Installing Megadrive core picodrive"
+}
+
+function configure_picodrive() {
+    printMsg "Configuring Megadrive core picodrive"
+}
+
+function package_picodrive() {
+    printMsg "Building package for Megadrive core picodrive"
+}
+
+# SNES emulator Pocketsnes -------------------------------------------------
+function sources_pocketsnes() {
+    printMsg "Getting sources for Pocketsnes"
+    gitPullOrClone "$rootdir/emulatorcores/pocketsnes-libretro" git://github.com/ToadKing/pocketsnes-libretro.git
+    patch -N -i $scriptdir/supplementary/pocketsnesmultip.patch $rootdir/emulatorcores/pocketsnes-libretro/src/ppu.cpp
+}
+
+function build_pocketsnes() {
+    printMsg "Installing SNES core (Libretro core)"
+    make clean
+    make
+    if [[ -z `find $rootdir/emulatorcores/pocketsnes-libretro/ -name "*libretro*.so"` ]]; then
+        __ERRMSGS="$__ERRMSGS Could not successfully compile SNES core."
+    fi      
+    popd
+}
+
+function install_pocketsnes() {
+    printMsg "Installing Pocketsnes"
+}
+
+function configure_pocketsnes() {
+    printMsg "Configuring Pocketsnes"
+}
+
+function package_pocketsnes() {
+    printMsg "Building package for Pocketsnes"
+}
