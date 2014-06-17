@@ -68,6 +68,10 @@ function install_sdl() {
 function sources_EmulationStation() {
 	printMsg "Getting sources of EmulationStation"
 
+    apt-get install -y libboost-system-dev libboost-filesystem-dev libboost-date-time-dev \
+                       libfreeimage-dev libfreetype6-dev libeigen3-dev libcurl4-openssl-dev \
+                       libasound2-dev cmake g++-4.7
+
 	# sourced of EmulationStation
 	gitPullOrClone "$rootdir/supplementary/EmulationStation" "https://github.com/Aloshi/EmulationStation" || return 1
 	pushd "$rootdir/supplementary/EmulationStation" || return 1
@@ -89,9 +93,9 @@ function build_EmulationStation() {
 function install_EmulationStation() {
 	printMsg "Installing EmulationStation"
 
-    if [[ ! -f /usr/lib/libEGL.so ]]; then
-        ln -fs /opt/vc/lib/libEGL.so /usr/lib/libEGL.so
-    fi
+    # if [[ ! -f /usr/lib/libEGL.so ]]; then
+    #     ln -fs /opt/vc/lib/libEGL.so /usr/lib/libEGL.so
+    # fi
 
 	if [[ -f "$rootdir/supplementary/EmulationStation/emulationstation" ]]; then
 		return 0
@@ -434,37 +438,39 @@ chmod +x 755 "/etc/emulationstation/es_systems.cfg"
 function package_EmulationStation() {
 	local PKGNAME
 
+    apt-get install -y reprepro
+
 	printMsg "Building package of EmulationStation"
 
-	# create Raspbian package
-	$PKGNAME="retropie-supplementary-emulationstation"
-	mkdir $PKGNAME
-	mkdir $PKGNAME/DEBIAN
-	cat >> $PKGNAME/DEBIAN/control << _EOF_
-Package: $PKGNAME
-Priority: optional
-Section: devel
-Installed-Size: 1
-Maintainer: Florian Mueller
-Architecture: armhf 
-Version: 1.0
-Depends: libboost-system-dev libboost-filesystem-dev libboost-date-time-dev libfreeimage-dev libfreetype6-dev libeigen3-dev libcurl4-openssl-dev libasound2-dev cmake g++-4.7
-Description: This package contains the front-end EmulationStation.
-_EOF_
+# 	# create Raspbian package
+# 	$PKGNAME="retropie-supplementary-emulationstation"
+# 	mkdir $PKGNAME
+# 	mkdir $PKGNAME/DEBIAN
+# 	cat >> $PKGNAME/DEBIAN/control << _EOF_
+# Package: $PKGNAME
+# Priority: optional
+# Section: devel
+# Installed-Size: 1
+# Maintainer: Florian Mueller
+# Architecture: armhf 
+# Version: 1.0
+# Depends: libboost-system-dev libboost-filesystem-dev libboost-date-time-dev libfreeimage-dev libfreetype6-dev libeigen3-dev libcurl4-openssl-dev libasound2-dev cmake g++-4.7
+# Description: This package contains the front-end EmulationStation.
+# _EOF_
 
-	mkdir -p $PKGNAME/usr/share/RetroPie/supplementary/EmulationStation
-	cd
-	cp -r $rootdir/supplementary/EmulationStation/emulationstation $PKGNAME$rootdir/supplementary/EmulationStation/
+# 	mkdir -p $PKGNAME/usr/share/RetroPie/supplementary/EmulationStation
+# 	cd
+# 	cp -r $rootdir/supplementary/EmulationStation/emulationstation $PKGNAME$rootdir/supplementary/EmulationStation/
 
-	# create package
-	dpkg-deb -z8 -Zgzip --build $PKGNAME
+# 	# create package
+# 	dpkg-deb -z8 -Zgzip --build $PKGNAME
 
-	# sign Raspbian package
-	dpkg-sig --sign builder $PKGNAME.deb
+# 	# sign Raspbian package
+# 	dpkg-sig --sign builder $PKGNAME.deb
 
-	# add package to repository
-	cd RetroPieRepo
-	reprepro --ask-passphrase -Vb . includedeb wheezy /home/pi/$PKGNAME.deb
+# 	# add package to repository
+# 	cd RetroPieRepo
+# 	reprepro --ask-passphrase -Vb . includedeb wheezy /home/pi/$PKGNAME.deb
 
 }
 
