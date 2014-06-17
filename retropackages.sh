@@ -141,7 +141,7 @@ import "scriptmodules/supplementary"
 # register script functions
 # rp_registerFunction "" "" "" "" "" "" ""
 
-# Emulators
+# Emulator components
 rp_registerFunction "100" "RetroArch                      " "sources_retroarch"       "build_retroarch"         "install_retroarch"         "configure_retroarch"       ""
 rp_registerFunction "101" "AdvMame                        " "sources_advmame"         "build_advmame"           "install_advmame"           "configure_advmame"         ""
 rp_registerFunction "102" "Amiga emulator UAE4All         " "sources_uae4all"         "build_uae4all"           "install_uae4all"           "configure_uae4all"         ""
@@ -156,12 +156,16 @@ rp_registerFunction "109" "Duke3D Port                    " ""                  
 rp_registerFunction "110" "GameBoy Advance emulator       " "sources_gpsp"            "build_gpsp"              ""                          "configure_gpsp"            ""
 rp_registerFunction "111" "NeoGeo emulator GnGeoPi        " "sources_gngeopi"         "build_gngeopi"           "install_gngeopi"           "configure_gngeopi"         ""
 rp_registerFunction "112" "Atari emulator Hatari          " ""                        ""                        "install_hatari"            ""                          ""
+rp_registerFunction "113" "MAME emulator MAME4All-Pi      " "sources_mame4all"        "build_mame4all"          ""                          "configure_mame4all"        ""
+rp_registerFunction "114" "Gamegear emulator Osmose       " "sources_osmose"          "build_osmose"            "install_osmose"            "configure_osmose"          ""
+rp_registerFunction "115" "Intellivision emulator         " "sources_jzint"           "build_jzint"             ""                          "configure_jzint"           ""
+rp_registerFunction "116" "Apple 2 emulator Linapple      " "sources_linapple"        "build_linapple"          ""                          "configure_linapple"        ""
 
-# LibretroCores functions
+# LibretroCore components
 rp_registerFunction "200" "SNES LibretroCore PocketSNES   " "sources_pocketsnes"       "build_pocketsnes"       "install_pocketsnes"        "configure_pocketsnes"      ""
 rp_registerFunction "201" "Genesis LibretroCore Picodrive " "sources_picodrive"        "build_picodrive"        "install_picodrive"         "configure_picodrive"       ""
 
-# Supplementary functions
+# Supplementary components
 rp_registerFunction "300" "Update APT packages            " ""                         ""                       "install_APTPackages" "" ""
 rp_registerFunction "301" "Package Repository             " ""                         ""                       "install_PackageRepository" "" ""
 rp_registerFunction "302" "SDL 2.0.1                      " "sources_sdl"              "build_sdl"              "install_sdl"               "" ""

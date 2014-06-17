@@ -508,6 +508,121 @@ function install_hatari() {
     apt-get install -y hatari    
 }
 
+function sources_mame4all() {
+    printMsg "Installing Mame4All-Pi"
+
+    gitPullOrClone "$rootdir/emulators/mame4all-pi" https://code.google.com/p/mame4all-pi/
+}
+
+function build_mame4all() {
+    pushd "$rootdir/emulators/mame4all-pi"
+    make clean
+    make
+    if [[ ! -f "$rootdir/emulators/mame4all-pi/mame" ]]; then
+        __ERRMSGS="$__ERRMSGS Could not successfully mame4all-pi emulator."
+    fi    
+    popd
+}
+
+function configure_mame4all() {
+    mkdir "$romdir/mame"
+    mkdir "$rootdir/emulators/mame4all-pi/cfg"
+    mkdir "$rootdir/emulators/mame4all-pi/hi"
+    mkdir "$rootdir/emulators/mame4all-pi/sta"
+    mkdir "$rootdir/emulators/mame4all-pi/roms"
+    ensureKeyValueShort "samplerate" "22050" "$rootdir/emulators/mame4all-pi/mame.cfg"
+    ensureKeyValueShort "rompath" "$rootdir/roms/mame" "$rootdir/emulators/mame4all-pi/mame.cfg"    
+}
+
+function sources_osmose() {
+    printMsg "Installing Mega Drive/Mastersystem/Game Gear emulator OsmMose"
+
+    wget 'https://dl.dropbox.com/s/z6l69wge8q1xq7r/osmose-0.8.1%2Brpi20121122.tar.bz2?dl=1' -O osmose.tar.bz2
+    tar -jxvf osmose.tar.bz2 -C "$scriptdir/emulators/"
+    rm osmose.tar.bz2
+}
+
+function build_osmose() {
+    pushd "$scriptdir/emulators/osmose-0.8.1+rpi20121122/"
+    make clean
+    make
+    if [[ ! -f "$rootdir/emulators/osmose-0.8.1+rpi20121122/osmose" ]]; then
+        __ERRMSGS="$__ERRMSGS Could not successfully compile OsmMose."
+    fi      
+    popd
+}
+
+function configure_osmose() {
+    mkdir "$romdir/gamegear"    
+}
+
+function sources_jzint() {
+    printMsg "Installing Intellivision emulator jzintv"
+    wget 'http://spatula-city.org/~im14u2c/intv/dl/jzintv-1.0-beta4-src.zip' -O jzintv.zip
+    unzip -n jzintv.zip -d "$rootdir/emulators/"
+    rm jzintv.zip
+}
+
+function build_jzint() {
+    pushd "$rootdir/emulators/jzintv-1.0-beta4/src/"
+    mkdir "$rootdir/emulators/jzintv-1.0-beta4/bin"
+    cat > "pi.diff" << _EOF_
+65c
+ OPT_FLAGS = -O3 -fomit-frame-pointer -fprefetch-loop-arrays -march=armv6 -mfloat-abi=hard -mfpu=vfp
+.
+_EOF_
+
+    patch -e Makefile pi.diff
+    make clean
+    make
+    if [[ ! -f "$rootdir/emulators/jzintv-1.0-beta4/bin/jzintv" ]]; then
+        __ERRMSGS="$__ERRMSGS Could not successfully compile jzintv."
+    else
+        __INFMSGS="$__INFMSGS You need to copy Intellivision BIOS files to the folder '/usr/local/share/jzintv/rom'."
+    fi      
+    popd
+}
+
+function configure_jzint() {
+    mkdir "$romdir/intellivision"    
+}
+
+function sources_linapple() {
+    printMsg "Installing Apple II emulator (Linapple)"
+    if [[ -d "$rootdir/emulators/apple2" ]]; then
+        rm -rf "$rootdir/emulators/apple2"
+    fi   
+    wget http://downloads.sourceforge.net/project/linapple/linapple/linapple-2a/linapple-src_2a.tar.bz2
+    tar -jxvf linapple-src_2a.tar.bz2 -C "$rootdir/emulators/"
+    rm linapple-src_2a.tar.bz2
+}
+
+function build_linapple() {
+    pushd "$rootdir/emulators/linapple-src_2a/src"
+    gcc_version 4.6
+    make
+    gcc_version $__default_gcc_version
+    popd    
+}
+
+function configure_linapple() {
+    if [[ ! -d $rootdir/roms/macintosh ]]; then
+        mkdir -p $rootdir/roms/macintosh
+    fi
+    cat > "$rootdir/emulators/linapple-src_2a/Start.sh" << _EOF_
+#!/bin/bash
+pushd $rootdir/emulators/linapple-src_2a
+./linapple
+popd
+_EOF_
+    chmod +x "$rootdir/emulators/linapple-src_2a/Start.sh"
+    touch $rootdir/roms/macintosh/Start.txt
+
+    pushd "$rootdir/emulators/linapple-src_2a"
+    sed -i -r -e "s|[^I]?Joystick 0[^I]?=[^I]?[0-9]|\tJoystick 0\t=\t1|g" linapple.conf
+    sed -i -r -e "s|[^I]?Joystick 1[^I]?=[^I]?[0-9]|\tJoystick 1\t=\t1|g" linapple.conf
+    popd
+}
 
 # --------------------------
 

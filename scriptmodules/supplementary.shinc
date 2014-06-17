@@ -44,14 +44,15 @@ function sources_sdl() {
     apt-get install -y libudev-dev libasound2-dev libdbus-1-dev libraspberrypi0 libraspberrypi-bin libraspberrypi-dev
 
     wget http://libsdl.org/release/SDL2-2.0.1.tar.gz
+    mkdir -p "$rootdir/supplementary/"
     tar xvfz SDL2-2.0.1.tar.gz -C "$rootdir/supplementary/"
+    rm SDL2-2.0.1.tar.gz || return 1
 }
 
 function build_sdl() {
     pushd "$rootdir/supplementary/SDL2-2.0.1" || return 1
     ./configure || return 1
     make || return 1
-    rm -rf SDL2-2.0.1 || return 1
     popd || return 1
 }
 
