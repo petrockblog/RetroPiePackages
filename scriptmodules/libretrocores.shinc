@@ -23,7 +23,7 @@ function install_picodrive() {
 
 function configure_picodrive() {
     printMsg "Configuring Megadrive core picodrive"
-
+    mkdir -p $home/RetroPie/roms/megadrive
 }
 
 function package_picodrive() {
@@ -54,18 +54,21 @@ function install_pocketsnes() {
 
 function configure_pocketsnes() {
     printMsg "Configuring Pocketsnes"
-    # look for existing configuration
-    xmlstarlet sel -t -c "/systemList/system[name='snes']" -n -v test.xml
 
-    # delete system
-    xmlstarlet ed -d "/systemList/system[name='snes']" -n test.xml
-
-    # add new system
-    xml ed -s /config -t elem -n sub -v "" -i /config/sub -t attr -n class -v com.foo test.xml
+    mkdir -p $home/RetroPie/roms/megadrive
     
-    # append to system
-    xmlstarlet ed -a '/xml/block/el[@name="b"]' \
-              --type 'elem' -n 'el' -v 0
+    # # look for existing configuration
+    # xmlstarlet sel -t -c "/systemList/system[name='snes']" -n -v test.xml
+
+    # # delete system
+    # xmlstarlet ed -d "/systemList/system[name='snes']" -n test.xml
+
+    # # add new system
+    # xml ed -s /config -t elem -n sub -v "" -i /config/sub -t attr -n class -v com.foo test.xml
+    
+    # # append to system
+    # xmlstarlet ed -a '/xml/block/el[@name="b"]' \
+    #           --type 'elem' -n 'el' -v 0
 }
 
 function package_pocketsnes() {
