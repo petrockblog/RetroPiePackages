@@ -471,10 +471,6 @@ function build_gpsp() {
 
 }
 
-function install_gpsp() {
-    
-}
-
 function configure_gpsp() {
     mkdir "$romdir/gba"
 }
@@ -515,18 +511,18 @@ function install_hatari() {
 
 # --------------------------
 
-function sources_XXX() {
+# function sources_XXX() {
 
-}
+# }
 
-function build_XXX() {
+# function build_XXX() {
 
-}
+# }
 
-function install_XXX() {
+# function install_XXX() {
 
-}
+# }
 
-function configure_XXX() {
+# function configure_XXX() {
     
-}
+# }

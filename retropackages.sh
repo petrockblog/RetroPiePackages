@@ -153,9 +153,9 @@ rp_registerFunction "107" "Macintosh emulator             " "sources_basilisk"  
 rp_registerFunction "108" "C64 emulator VICE              " "sources_vice"            "build_vice"              "install_vice"              "configure_vice"            ""
 rp_registerFunction "108" "C64 ROMs                       " ""                        ""                        "install_c64roms"           ""                          ""
 rp_registerFunction "109" "Duke3D Port                    " ""                        ""                        "install_eduke32"           ""                          ""
-rp_registerFunction "110" "GameBoy Advance emulator       " "sources_gpsp"            "build_gpsp"              "install_gpsp"              "configure_gpsp"            ""
+rp_registerFunction "110" "GameBoy Advance emulator       " "sources_gpsp"            "build_gpsp"              ""                          "configure_gpsp"            ""
 rp_registerFunction "111" "NeoGeo emulator GnGeoPi        " "sources_gngeopi"         "build_gngeopi"           "install_gngeopi"           "configure_gngeopi"         ""
-rp_registerFunction "112" "Atari emulator Hatari          " ""                        ""                        "install_hatari"           ""                          ""
+rp_registerFunction "112" "Atari emulator Hatari          " ""                        ""                        "install_hatari"            ""                          ""
 
 # LibretroCores functions
 rp_registerFunction "200" "SNES LibretroCore PocketSNES   " "sources_pocketsnes"       "build_pocketsnes"       "install_pocketsnes"        "configure_pocketsnes"      ""
@@ -174,6 +174,7 @@ rp_registerFunction "304" "EmulationStation Theme Simple  " ""                  
 
 # ID mode
 if [[ $# -eq 1 ]]; then
+    ensureRootdirExists
 	id=$1
 	fn_exists ${__sources[$id]} && ${__sources[$id]}
 	fn_exists ${__build[$id]} && ${__build[$id]}
@@ -181,6 +182,7 @@ if [[ $# -eq 1 ]]; then
 	fn_exists ${__configure[$id]} && ${__configure[$id]}
 	fn_exists ${__package[$id]} && ${__package[$id]}
 elif [[ $# -eq 2 ]]; then
+    ensureRootdirExists
     id=$1
     if [ "$2" == "sources" ]; then
         fn_exists ${__sources[$id]} && ${__sources[$id]}
