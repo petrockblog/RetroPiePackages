@@ -117,10 +117,10 @@ function rp_printUsageinfo() {
 # -------------------------------------------------------------
 
 # check, if sudo is used
-# if [ $(id -u) -ne 0 ]; then
-#     printf "Script must be run as root. Try 'sudo ./retropackages'\n"
-#     exit 1
-# fi   
+if [ $(id -u) -ne 0 ]; then
+    printf "Script must be run as root. Try 'sudo ./retropackages'\n"
+    exit 1
+fi   
 
 # load script modules
 script_invoke_path="$0"
@@ -145,7 +145,8 @@ rp_registerFunction "201" "Genesis LibretroCore Picodrive " "sources_picodrive" 
 
 # Supplementary functions
 rp_registerFunction "300" "Package Repository             " ""                         ""                       "install_PackageRepository" "" ""
-rp_registerFunction "301" "EmulationStation               " "sources_EmulationStation" "build_EmulationStation" "install_EmulationStation" "configure_EmulationStation" "package_EmulationStation"
+rp_registerFunction "301" "SDL 2.0.1                      " "sources_sdl"              "build_sdl"              "install_sdl"               "" ""
+rp_registerFunction "302" "EmulationStation               " "sources_EmulationStation" "build_EmulationStation" "install_EmulationStation"  "configure_EmulationStation" "package_EmulationStation"
 
 # ID mode
 if [[ $# -eq 1 ]]; then
@@ -157,20 +158,20 @@ if [[ $# -eq 1 ]]; then
 	fn_exists ${__package[$id]} && ${__package[$id]}
 elif [[ $# -eq 2 ]]; then
     id=$1
-    if [ fn_exists ${__sources[$id]} ] && [ $2 == "sources" ]; then
-        ${__sources[$id]}
+    if [ "$2" == "sources" ]; then
+        fn_exists ${__sources[$id]} && ${__sources[$id]}
     fi
-    if [ fn_exists ${__build[$id]} ] && [ $2 == "build" ]; then
-        ${__build[$id]}
+    if [ "$2" == "build" ]; then
+        fn_exists ${__build[$id]} && ${__build[$id]}
     fi
-    if fn_exists ${__install[$id]}; then
-        [ $2 == "install" ] && ${__install[$id]}
+    if [ "$2" == "install" ]; then
+        fn_exists ${__install[$id]} && ${__install[$id]}
     fi
-    if [ fn_exists ${__configure[$id]} ] && [ $2 == "configure" ]; then
-        ${__configure[$id]}
+    if [ "$2" == "configure" ]; then
+        fn_exists ${__configure[$id]} && ${__configure[$id]}
     fi
-    if [ fn_exists ${__package[$id]} ] && [ $2 == "install" ]; then
-        ${__package[$id]}
+    if [ "$2" == "install" ]; then
+        fn_exists ${__package[$id]} && ${__package[$id]}
     fi
 else
     rp_printUsageinfo

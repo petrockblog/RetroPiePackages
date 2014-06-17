@@ -25,19 +25,44 @@ Pull: wheezy/rpi
 _EOF_
 }
 
-# 301, Emulation Station ----------------------
+# 301, SDL 2.0.1
+
+function sources_sdl() {
+    printMsg "Getting sources of SDL 2.0.1"
+
+    # These packages are listed in SDL2's "README-raspberrypi.txt" file as build dependencies.
+    # If libudev-dev is not installed before compiling, the keyboard will mysteriously not work!
+    # The rest should already be installed, but just to be safe, include them all.
+    apt-get install -y libudev-dev libasound2-dev libdbus-1-dev libraspberrypi0 libraspberrypi-bin libraspberrypi-dev
+
+    wget http://libsdl.org/release/SDL2-2.0.1.tar.gz
+    tar xvfz SDL2-2.0.1.tar.gz -C "$rootdir/supplementary/"
+}
+
+function build_sdl() {
+    pushd "$rootdir/supplementary/SDL2-2.0.1" || return 1
+    ./configure || return 1
+    make || return 1
+    rm -rf SDL2-2.0.1 || return 1
+    popd || return 1
+}
+
+function install_sdl() {
+    pushd "$rootdir/supplementary/SDL2-2.0.1" || return 1
+    make install || return 1
+    popd || return 1
+}
+
+
+# 302, Emulation Station ----------------------
 
 function sources_EmulationStation() {
 	printMsg "Getting sources of EmulationStation"
 
-	# get SDL2 sources if not already installed
-	wget http://libsdl.org/release/SDL2-2.0.1.tar.gz || return 1
-	tar xvfz SDL2-2.0.1.tar.gz || return 1
-	rm SDL2-2.0.1.tar.gz || return 1
-
 	# sourced of EmulationStation
-	gitPullOrClone "https://github.com/Aloshi/EmulationStation" "$rootdir/supplementary/EmulationStation" || return 1
+	gitPullOrClone "$rootdir/supplementary/EmulationStation" "https://github.com/Aloshi/EmulationStation" || return 1
 	pushd "$rootdir/supplementary/EmulationStation" || return 1
+    git pull || return 1
 	git checkout unstable || return 1
 	popd
 }
@@ -45,23 +70,20 @@ function sources_EmulationStation() {
 function build_EmulationStation() {
 	printMsg "Building EmulationStation"
 
-	# SDL2 if needed
-	pushd SDL2-2.0.1 || return 1
-	./configure || return 1
-	make || return 1
-	sudo make install || return 1
-	rm -rf SDL2-2.0.1 || return 1
-	popd || return 1
-
 	# EmulationStation
 	pushd "$rootdir/supplementary/EmulationStation" || return 1
 	cmake -D CMAKE_CXX_COMPILER=g++-4.7 . || return 1
 	make || return 1
-	popd || return 1
+	popd
 }
 
 function install_EmulationStation() {
 	printMsg "Installing EmulationStation"
+
+    if [[ ! -f /usr/lib/libEGL.so ]]; then
+        ln -fs /opt/vc/lib/libEGL.so /usr/lib/libEGL.so
+    fi
+
 	if [[ -f "$rootdir/supplementary/EmulationStation/emulationstation" ]]; then
 		return 0
 	else

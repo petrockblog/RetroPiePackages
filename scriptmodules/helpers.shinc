@@ -183,8 +183,10 @@ fn_exists()
 # clones or updates the sources of a repository $2 into the directory $1
 function gitPullOrClone()
 {
-    if [[ -d "$1/.git" ]]; then
+    if [ -d "$1/.git" ]; then
+        pushd $1
         git pull
+        popd
     else
         rm -rf "$1" # makes sure that the directory IS empty
         mkdir -p "$1"

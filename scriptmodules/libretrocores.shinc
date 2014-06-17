@@ -8,6 +8,7 @@ function sources_picodrive() {
 
 function build_picodrive() {
     printMsg "Building Megadrive core picodrive"
+    pushd "$rootdir/emulatorcores/picodrive"
     make clean
     make -f Makefile.libretro platform=armv6    
     if [[ ! -f `find $rootdir/emulatorcores/picodrive/ -name "*libretro*.so"` ]]; then
@@ -38,6 +39,7 @@ function sources_pocketsnes() {
 
 function build_pocketsnes() {
     printMsg "Installing SNES core (Libretro core)"
+    pushd "$rootdir/emulatorcores/pocketsnes-libretro"
     make clean
     make
     if [[ -z `find $rootdir/emulatorcores/pocketsnes-libretro/ -name "*libretro*.so"` ]]; then
