@@ -5,14 +5,18 @@ function sources_retroarch() {
 
 function build_retroarch() {
     printMsg "Building RetroArch"
+    pushd "$rootdir/emulators/RetroArch"
     ./configure --prefix="$prefix/emulators/RetroArch/installdir" --disable-x11 --disable-oss --disable-pulse --disable-sdl --enable-floathard
     make clean
     make
+    popd
 }
 
 function install_retroarch() {
     printMsg "Installing RetroArch"
+    pushd "$rootdir/emulators/RetroArch"
     make install
+    popd
     if [[ ! -f "$prefix/emulators/RetroArch/installdir/bin/retroarch" ]]; then
         __ERRMSGS="$__ERRMSGS Could not successfully compile and install RetroArch."
     fi  
