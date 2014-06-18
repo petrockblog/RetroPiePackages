@@ -3,7 +3,9 @@
 function sources_picodrive() {
     printMsg "Getting sources for Megadrive core Picodrive"
     gitPullOrClone "$rootdir/emulatorcores/picodrive" https://github.com/libretro/picodrive.git
+    pushd "$rootdir/emulatorcores/picodrive"
     git submodule init && git submodule update
+    popd
 }
 
 function build_picodrive() {
@@ -13,7 +15,7 @@ function build_picodrive() {
     make -f Makefile.libretro platform=armv6    
     if [[ ! -f `find $rootdir/emulatorcores/picodrive/ -name "*libretro*.so"` ]]; then
         __ERRMSGS="$__ERRMSGS Could not successfully compile Genesis core Picodrive."
-    fi      
+    fi
     popd
 }
 
@@ -34,7 +36,9 @@ function package_picodrive() {
 function sources_pocketsnes() {
     printMsg "Getting sources for Pocketsnes"
     gitPullOrClone "$rootdir/emulatorcores/pocketsnes-libretro" git://github.com/ToadKing/pocketsnes-libretro.git
+    pushd "$rootdir/emulatorcores/pocketsnes-libretro"
     patch -N -i $scriptdir/supplementary/pocketsnesmultip.patch $rootdir/emulatorcores/pocketsnes-libretro/src/ppu.cpp
+    popd
 }
 
 function build_pocketsnes() {
