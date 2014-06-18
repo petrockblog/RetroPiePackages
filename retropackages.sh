@@ -124,12 +124,16 @@ if [ $(id -u) -ne 0 ]; then
     exit 1
 fi   
 
+scriptdir=`dirname $0`
+scriptdir=`cd $scriptdir && pwd`
+
 # load script modules
 script_invoke_path="$0"
 script_name=`basename "$0"`
 getScriptAbsoluteDir "$script_invoke_path"
 script_absolute_dir=$RESULT
 home=$(eval echo ~$user)
+
 import "scriptmodules/helpers"
 import "scriptmodules/emulators"
 import "scriptmodules/libretrocores"
