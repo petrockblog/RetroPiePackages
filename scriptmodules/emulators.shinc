@@ -25,12 +25,12 @@ function install_retroarch() {
 function configure_retroarch() {
     printMsg "Configuring RetroArch"
 
-    cp $rootdir/supplementary/retroarch-zip "$rootdir/emulators/RetroArch/installdir/bin/"
+    cp $scriptdir/supplementary/retroarch-zip "$rootdir/emulators/RetroArch/installdir/bin/"
 
     if [[ ! -d "$rootdir/emulators/RetroArch/configs/" ]]; then
         mkdir -p "$rootdir/emulators/RetroArch/configs/"
     fi
-    cp $rootdir/supplementary/RetroArchConfigs/*.cfg "$rootdir/emulators/RetroArch/configs/"
+    cp $scriptdir/supplementary/RetroArchConfigs/*.cfg "$rootdir/emulators/RetroArch/configs/"
 
    if [[ ! -f "$rootdir/configs/all/retroarch.cfg" ]]; then
         mkdir -p "$rootdir/configs/all/"
