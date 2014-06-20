@@ -78,3 +78,266 @@ function configure_pocketsnes() {
 function package_pocketsnes() {
     printMsg "Building package for Pocketsnes"
 }
+
+function sources_stellalibretro() {
+    printMsg "Getting sources of stellalibretro"
+    gitPullOrClone "$rootdir/emulatorcores/stella-libretro" git://github.com/libretro/stella-libretro.git
+}
+
+function build_stellalibretro() {
+    printMsg "Building stellalibretro"
+    pushd "$rootdir/emulatorcores/stella-libretro"
+    make clean
+    make
+    if [[ -z `find $rootdir/emulatorcores/stella-libretro/ -name "*libretro*.so"` ]]; then
+        __ERRMSGS="$__ERRMSGS Could not successfully compile Atari 2600 core."
+    fi  
+    popd   
+}
+
+function configure_stellalibretro() {
+    mkdir -p $romdir/atari2600
+}
+
+function sources_cavestory() {
+    printMsg "Getting sources of cavestory"
+    gitPullOrClone "$rootdir/emulatorcores/nxengine-libretro" git://github.com/libretro/nxengine-libretro.git
+}
+
+function build_cavestory() {
+    printMsg "Building cavestory"
+    pushd "$rootdir/emulatorcores/nxengine-libretro"
+    make platform=rpi
+    if [[ -z `find $rootdir/emulatorcores/nxengine-libretro/ -name "*libretro*.so"` ]]; then
+        __ERRMSGS="$__ERRMSGS Could not successfully compile NXEngine / Cave Story core."
+    fi  
+    popd
+}
+
+function configure_cavestory() {
+    printMsg "Configuring cavestory"
+    if [[ ! -d $romdir/ports ]]; then
+        mkdir -p $romdir/ports
+    fi 
+    cat > "$romdir/ports/Cave Story.sh" << _EOF_
+#!/bin/bash
+$rootdir/supplementary/runcommand/runcommand.sh 1 "$rootdir/emulators/RetroArch/installdir/bin/retroarch -L `find $rootdir/emulatorcores/nxengine-libretro/ -name "*libretro*.so" | head -1` --config $rootdir/configs/all/retroarch.cfg --appendconfig $rootdir/configs/cavestory/retroarch.cfg $rootdir/emulatorcores/nxengine-libretro/datafiles/Doukutsu.exe"
+_EOF_
+    chmod +x "$romdir/ports/Cave Story.sh"
+}
+
+function sources_doom() {
+    printMsg "Getting sources of doom"
+    gitPullOrClone "$rootdir/emulatorcores/libretro-prboom" git://github.com/libretro/libretro-prboom.git
+}
+
+function build_doom() {
+    printMsg "Building doom"
+    pushd "$rootdir/emulatorcores/libretro-prboom"
+    make clean
+    make
+    if [[ -z `find $rootdir/emulatorcores/libretro-prboom/ -name "*libretro*.so"` ]]; then
+        __ERRMSGS="$__ERRMSGS Could not successfully compile Doom core."
+    fi  
+    popd
+}
+
+function configure_doom() {
+    printMsg "Configuring doom"
+    mkdir -p $romdir/ports/doom
+    cp $rootdir/emulatorcores/libretro-prboom/prboom.wad $romdir/ports/doom
+
+    cat > "$romdir/ports/Doom 1 Shareware.sh" << _EOF_
+#!/bin/bash
+$rootdir/supplementary/runcommand/runcommand.sh 1 "$rootdir/emulators/RetroArch/installdir/bin/retroarch -L `find $rootdir/emulatorcores/libretro-prboom/ -name "*libretro*.so" | head -1` --config $rootdir/configs/all/retroarch.cfg --appendconfig $rootdir/configs/doom/retroarch.cfg $romdir/ports/doom/doom1.wad"
+_EOF_
+    chown +x "$romdir/ports/Doom 1 Shareware.sh"
+
+    # download and install Doom 1 shareware
+    if `wget "http://distro.ibiblio.org/pub/linux/distributions/slitaz/sources/packages/d/doom1.wad"`; then
+        mv doom1.wad "$romdir/ports/doom/"
+    else
+        __ERRMSGS="$__ERRMSGS Could not successfully download and install Doom 1 shareware."
+    fi
+    # download and install midi instruments
+    pushd /usr/local/lib
+    if `wget "http://www.libsdl.org/projects/SDL_mixer/timidity/timidity.tar.gz"`; then
+    tar -xf timidity.tar.gz
+        ln -s /usr/local/lib/timidity/timidity.cfg /etc/timidity.cfg
+    else
+        echo error
+    fi
+    popd
+}
+
+function sources_gbclibretro() {
+    printMsg "Getting sources of gbclibretro"
+    gitPullOrClone "$rootdir/emulatorcores/gambatte-libretro" git://github.com/libretro/gambatte-libretro.git
+}
+
+function build_gbclibretro() {
+    printMsg "Building gbclibretro"
+    pushd "$rootdir/emulatorcores/gambatte-libretro"
+    make -f Makefile.libretro clean
+    make -C libgambatte -f Makefile.libretro
+    if [[ -z `find $rootdir/emulatorcores/gambatte-libretro/libgambatte/ -name "*libretro*.so"` ]]; then
+        __ERRMSGS="$__ERRMSGS Could not successfully compile Game Boy Color core."
+    fi      
+    popd
+}
+
+function configure_gbclibretro() {
+    printMsg "Configuring gbclibretro"
+    mkdir -p $romdir/gbc
+}
+
+function sources_mamelibretro() {
+    printMsg "Getting sources of mamelibretro"
+    gitPullOrClone "$rootdir/emulatorcores/imame4all-libretro" git://github.com/libretro/imame4all-libretro.git
+}
+
+function build_mamelibretro() {
+    printMsg "Building mamelibretro"
+    pushd "$rootdir/emulatorcores/imame4all-libretro"
+    make -f makefile.libretro clean
+    make -f makefile.libretro ARM=1
+    if [[ -z `find $rootdir/emulatorcores/imame4all-libretro/ -name "*libretro*.so"` ]]; then
+        __ERRMSGS="$__ERRMSGS Could not successfully compile MAME core."
+    fi      
+    popd
+}
+
+function configure_mamelibretro() {
+    printMsg "Configuring mamelibretro"
+    mkdir -p $romdir/mame
+}
+
+function sources_fbalibretro() {
+    printMsg "Getting sources of fbalibretro"
+    gitPullOrClone "$rootdir/emulatorcores/fba-libretro" git://github.com/libretro/fba-libretro.git
+    apt-get install -y --force-yes cpp-4.5 gcc-4.5 g++-4.5
+}
+
+function build_fbalibretro() {
+    printMsg "Building fbalibretro"
+    pushd "$rootdir/emulatorcores/fba-libretro"
+    cd $rootdir/emulatorcores/fba-libretro/svn-current/trunk/
+    gcc_version 4.5
+    make -f makefile.libretro clean
+    make -f makefile.libretro -j4 platform=armvhardfloat
+    gcc_version $__default_gcc_version
+    mv svn-current/trunk/*libretro*.so $rootdir/emulatorcores/fba-libretro/
+    if [[ -z `find $rootdir/emulatorcores/fba-libretro/ -name "*libretro*.so"` ]]; then
+        __ERRMSGS="$__ERRMSGS Could not successfully compile FBA core."
+    fi
+    popd
+}
+
+function configure_fbalibretro() {
+    printMsg "Configuring fbalibretro"
+    mkdir -p $romdir/fba
+}
+
+function sources_neslibretro() {
+    printMsg "Getting sources of neslibretro"
+    gitPullOrClone "$rootdir/emulatorcores/fceu-next" git://github.com/libretro/fceu-next.git
+}
+
+function build_neslibretro() {
+    printMsg "Building neslibretro"
+    pushd "$rootdir/emulatorcores/fceu-next/fceumm-code"
+    make -f Makefile.libretro clean
+    make -f Makefile.libretro
+    popd
+    if [[ -z `find $rootdir/emulatorcores/fceu-next/fceumm-code/ -name "*libretro*.so"` ]]; then
+        __ERRMSGS="$__ERRMSGS Could not successfully compile NES core."
+    fi      
+    popd
+}
+
+function configure_neslibretro() {
+    printMsg "Configuring neslibretro"
+    mkdir -p $romdir/nes
+}
+
+function sources_genesislibretro() {
+    printMsg "Getting sources of genesislibretro"
+    gitPullOrClone "$rootdir/emulatorcores/Genesis-Plus-GX" git://github.com/libretro/Genesis-Plus-GX.git
+}
+
+function build_genesislibretro() {
+    printMsg "Building genesislibretro"
+    pushd "$rootdir/emulatorcores/Genesis-Plus-GX"
+    make -f Makefile.libretro clean
+    make -f Makefile.libretro 
+    if [[ ! -f `find $rootdir/emulatorcores/Genesis-Plus-GX/ -name "*libretro*.so"` ]]; then
+        __ERRMSGS="$__ERRMSGS Could not successfully compile Genesis core."
+    fi      
+    popd
+}
+
+function configure_genesislibretro() {
+    printMsg "Configuring genesislibretro"
+    mkdir -p $romdir/megadrive
+}
+
+function sources_turbografx16() {
+    printMsg "Getting sources of turbografx16"
+    gitPullOrClone "$rootdir/emulatorcores/mednafen-pce-libretro/" https://github.com/petrockblog/mednafen-pce-libretro.git
+}
+
+function build_turbografx16() {
+    printMsg "Building turbografx16"
+    pushd "$rootdir/emulatorcores/mednafen-pce-libretro/"
+    make clean
+    make
+    if [[ ! -f `find $rootdir/emulatorcores/mednafen-pce-libretro/ -name "*libretro*.so"` ]]; then
+        __ERRMSGS="$__ERRMSGS Could not successfully compile PC Engine core."
+    fi      
+    popd
+}
+
+function configure_turbografx16() {
+    printMsg "Configuring turbografx16"
+    mkdir -p $romdir/pcengine
+}
+
+function sources_psxlibretro() {
+    printMsg "Getting sources of psxlibretro"
+    gitPullOrClone "$rootdir/emulatorcores/pcsx_rearmed" git://github.com/libretro/pcsx_rearmed.git
+}
+
+function build_psxlibretro() {
+    printMsg "Building psxlibretro"
+    pushd "$rootdir/emulatorcores/pcsx_rearmed"
+    ./configure --platform=libretro
+    make clean
+    make
+    if [[ -z `find $rootdir/emulatorcores/pcsx_rearmed/ -name "*libretro*.so"` ]]; then
+        __ERRMSGS="$__ERRMSGS Could not successfully compile Playstation core."
+    fi      
+    popd    
+}
+
+function configure_psxlibretro() {
+    printMsg "Configuring psxlibretro"
+    mkdir -p $romdir/psx
+}
+
+# function sources_XXX() {
+#     printMsg "Getting sources of XXX"
+# }
+
+# function build_XXX() {
+#     printMsg "Building XXX"
+# }
+
+# function install_XXX() {
+#     printMsg "Installing XXX"
+# }
+
+# function configure_XXX() {
+#     printMsg "Configuring XXX"
+# }
+
+

@@ -269,6 +269,16 @@ function configure_EmulationStation() {
     </system>
 
     <system>
+        <fullname>MSX</fullname>
+        <name>msx</name>
+        <path>~/RetroPie/roms/msx</path>
+        <extension>.rom .ROM</extension>
+        <command>$rootdir/supplementary/runcommand/runcommand.sh 4 "$rootdir/emulators/openmsx-0.10.0 %BASENAME%"</command>
+        <platform></platform>
+        <theme>msx</theme>
+    </system>    
+
+    <system>
         <fullname>PC (x86)</fullname>
         <name>pc</name>
         <path>~/RetroPie/roms/pc</path>
@@ -481,4 +491,11 @@ function install_ESThemeSimple() {
     unzip themesDownload.zip -d "/etc/emulationstation/"
     rm themesDownload.zip
     chmod -R 755 "/etc/emulationstation/themes/"
+}
+
+function install_runcommand() {
+    printMsg "Installing script for setting video mode."
+    mkdir -p "$rootdir/supplementary/runcommand/"
+    cp $scriptdir/supplementary/runcommand.sh "$rootdir/supplementary/runcommand/"
+    chmod +x "$rootdir/supplementary/runcommand/runcommand.sh"
 }

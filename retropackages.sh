@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-# global variables
+# global variables ==========================================================
+
 __cmdid=()
 __description=()
 __sources=()
@@ -11,7 +12,20 @@ __package=()
 __doPackages=0
 
 rootdir="/opt/retropie"
-romroot="~/RetroPie/roms"
+
+__ERRMSGS=""
+__INFMSGS=""
+__doReboot=0
+
+__default_cflags="-O2 -pipe -mfpu=vfp -march=armv6j -mfloat-abi=hard"
+__default_asflags=""
+__default_gcc_version="4.7"
+
+[[ -z "${CFLAGS}"        ]] && export CFLAGS="${__default_cflags}"
+[[ -z "${CXXFLAGS}" ]] && export CXXFLAGS="${__default_cflags}"
+[[ -z "${ASFLAGS}"         ]] && export ASFLAGS="${__default_asflags}"
+
+# ==============================================================================
 
 function getScriptAbsoluteDir() {
     # @description used to get the script path
@@ -118,6 +132,12 @@ function rp_printUsageinfo() {
 
 # -------------------------------------------------------------
 
+user=$SUDO_USER
+if [ -z "$user" ]
+then
+    user=$(whoami)
+fi
+
 # check, if sudo is used
 if [ $(id -u) -ne 0 ]; then
     printf "Script must be run as root. Try 'sudo ./retropackages'\n"
@@ -133,6 +153,10 @@ script_name=`basename "$0"`
 getScriptAbsoluteDir "$script_invoke_path"
 script_absolute_dir=$RESULT
 home=$(eval echo ~$user)
+romdir="$home/RetroPie/roms"
+if [[ ! -d $romdir ]]; then
+    mkdir -p $romdir
+fi
 
 import "scriptmodules/helpers"
 import "scriptmodules/emulators"
@@ -164,10 +188,30 @@ rp_registerFunction "114" "MAME emulator MAME4All-Pi      " "sources_mame4all"  
 rp_registerFunction "115" "Gamegear emulator Osmose       " "sources_osmose"          "build_osmose"            "install_osmose"            "configure_osmose"          ""
 rp_registerFunction "116" "Intellivision emulator         " "sources_jzint"           "build_jzint"             ""                          "configure_jzint"           ""
 rp_registerFunction "117" "Apple 2 emulator Linapple      " "sources_linapple"        "build_linapple"          ""                          "configure_linapple"        ""
+rp_registerFunction "118" "N64 emulator MUPEN64Plus-RPi   " "sources_mupen64rpi"      "build_mupen64rpi"        ""                          "configure_mupen64rpi"      ""
+rp_registerFunction "119" "SNES emulator SNES9X           " "sources_snes9x"          "build_snes9x"            ""                          "configure_snes9x"          ""
+rp_registerFunction "120" "FBA emulator PiFBA             " "sources_pifba"           "build_pifba"             ""                          "configure_pifba"           ""
+rp_registerFunction "121" "SNES emulator PiSNES           " "sources_pisnes"          "build_pisnes"            ""                          "configure_pisnes"          ""
+rp_registerFunction "122" "DOS Emulator rpix86            " ""                        ""                        "install_rpix86"            "configure_rpix86"          ""
+rp_registerFunction "123" "ScummVM                        " ""                        ""                        "install_scummvm"           ""                          ""
+rp_registerFunction "124" "ZMachine                       " ""                        ""                        "install_zmachine"          ""                          ""
+rp_registerFunction "125" "ZXSpectrum emulator Fuse       " ""                        ""                        "install_zxspectrum"        ""                          ""
+rp_registerFunction "126" "ZXSpectrum emulator FBZX       " "sources_fbzx"            "build_fbzx"              ""                          ""                          ""
+rp_registerFunction "127" "MSX emulator OpenMSX           " "sources_openmsx"         "build_openmsx"           ""                          "configure_openmsx"         ""
 
 # LibretroCore components
 rp_registerFunction "200" "SNES LibretroCore PocketSNES   " "sources_pocketsnes"       "build_pocketsnes"       "install_pocketsnes"        "configure_pocketsnes"      ""
 rp_registerFunction "201" "Genesis LibretroCore Picodrive " "sources_picodrive"        "build_picodrive"        "install_picodrive"         "configure_picodrive"       ""
+rp_registerFunction "202" "Atari 2600 LibretroCore Stella " "sources_stellalibretro"   "build_stellalibretro"   ""                          "configure_stellalibretro"  ""
+rp_registerFunction "203" "Cave Story LibretroCore        " "sources_cavestory"        "build_cavestory"        ""                          "configure_cavestory"       ""
+rp_registerFunction "204" "Doom LibretroCore              " "sources_doom"             "build_doom"             ""                          "configure_doom"            ""
+rp_registerFunction "205" "Gameboy Color LibretroCore     " "sources_gbclibretro"      "build_gbclibretro"      ""                          "configure_gbclibretro"     ""
+rp_registerFunction "206" "MAME LibretroCore              " "sources_mamelibretro"     "build_mamelibretro"     ""                          "configure_mamelibretro"    ""
+rp_registerFunction "207" "FBA LibretroCore               " "sources_fbalibretro"      "build_fbalibretro"      ""                          "configure_fbalibretro"     ""
+rp_registerFunction "208" "NES LibretroCore fceu-next     " "sources_neslibretro"      "build_neslibretro"      ""                          "configure_neslibretro"     ""
+rp_registerFunction "209" "Genesis/Megadrive LibretroCore " "sources_genesislibretro"  "build_genesislibretro"  ""                          "configure_genesislibretro" ""
+rp_registerFunction "210" "TurboGrafx 16 LibretroCore     " "sources_turbografx16"     "build_turbografx16"     ""                          "configure_turbografx16"    ""
+rp_registerFunction "211" "Playstation 1 LibretroCore     " "sources_psxlibretro"      "build_psxlibretro"      ""                          "configure_psxlibretro"     ""
 
 # Supplementary components
 rp_registerFunction "300" "Update APT packages            " ""                         ""                       "install_APTPackages" "" ""
@@ -175,6 +219,7 @@ rp_registerFunction "301" "Package Repository             " ""                  
 rp_registerFunction "302" "SDL 2.0.1                      " "sources_sdl"              "build_sdl"              "install_sdl"               "" ""
 rp_registerFunction "303" "EmulationStation               " "sources_EmulationStation" "build_EmulationStation" "install_EmulationStation"  "configure_EmulationStation" "package_EmulationStation"
 rp_registerFunction "304" "EmulationStation Theme Simple  " ""                         ""                       "install_ESThemeSimple"     "" ""
+rp_registerFunction "305" "Video mode script 'runcommand' " ""                         ""                       "install_runcommand"        "" ""
 
 # ==========================================================================
 # ==========================================================================
