@@ -94,6 +94,51 @@ function import() {
     exit 1
 }
 
+function loadConfig() {
+    # @description Routine for loading configuration files that contain key-value pairs in the format KEY="VALUE"
+    # param  $1 Path to the configuration file relate to this file.
+    local configfile=$1
+    if test -e "$script_absolute_dir/$configfile"
+    then
+        . "$script_absolute_dir/$configfile"
+        echo "Loaded configuration file $script_absolute_dir/$configfile"
+        return
+    else
+        echo "Unable to find configuration file $script_absolute_dir/$configfile"
+        exit 1
+    fi
+}
+
+function rps_checkNeededPackages() {
+    if [[ -z $(type -P git) || -z $(type -P dialog) ]]; then
+        echo "Did not find needed packages 'git' and/or 'dialog'. I am trying to install these now."
+        apt-get update
+        apt-get install -y git dialog
+        if [ $? == '0' ]; then
+            echo "Successfully installed 'git' and/or 'dialog'."
+        else
+            echo "Could not install 'git' and/or 'dialog'. Aborting now."
+            exit 1
+        fi
+    else
+        echo "Found needed packages 'git' and 'dialog'."
+    fi 
+}
+
+function rps_availFreeDiskSpace() {
+    local __required=$1
+    local __avail=`df -P $rootdir | tail -n1 | awk '{print $4}'`
+
+    required_MB=`expr $__required / 1024`
+    available_MB=`expr $__avail / 1024`
+
+    if [[ "$__required" -le "$__avail" ]] || ask "Minimum recommended disk space ($required_MB MB) not available. Try 'sudo raspi-config' to resize partition to full size. Only $available_MB MB available at $rootdir continue anyway?"; then
+        return 0;
+    else
+        exit 0;
+    fi
+}
+
 # params: $1=ID, $2=description, $3=sources, $4=build, $5=install, $6=configure, $7=package
 function rp_registerFunction() {
 	__cmdid+=($1)
@@ -124,13 +169,17 @@ function rp_listFunctions() {
 }
 
 function rp_printUsageinfo() {
-    echo -e "Usage information:\nCall retropackages.sh in the following way:\n./retropackages.sh <ID>\nThis will run the actions sources, build, install, configure, and package automatically.\n"
+    echo -e "Usage:\n$0 <ID1> [<ID2> ... <IDN>] [sources|build|install|configure|package]\nThis will run the actions sources, build, install, configure, and package automatically.\n"
     echo -e "Alternatively, retropackages.sh can be called as\n./retropackages.sh <ID> [sources|build|install|configure|package]\n"
     echo -e "This is a list of valid commands:\n"
     rp_listFunctions
 }
 
 # -------------------------------------------------------------
+rps_checkNeededPackages
+
+# make sure that enough space is available
+rps_availFreeDiskSpace 800000
 
 user=$SUDO_USER
 if [ -z "$user" ]
@@ -163,63 +212,79 @@ import "scriptmodules/emulators"
 import "scriptmodules/libretrocores"
 import "scriptmodules/supplementary"
 
+loadConfig "configs/retronetplay.cfg"
+
 # ==========================================================================
 # ==========================================================================
 
 # register script functions
 # rp_registerFunction "" "" "" "" "" "" ""
 
-# Emulator components
-rp_registerFunction "100" "RetroArch                      " "sources_retroarch"       "build_retroarch"         "install_retroarch"         "configure_retroarch"       ""
-rp_registerFunction "101" "AdvMame                        " "sources_advmame"         "build_advmame"           "install_advmame"           "configure_advmame"         ""
-rp_registerFunction "102" "Amiga emulator UAE4All         " "sources_uae4all"         "build_uae4all"           "install_uae4all"           "configure_uae4all"         ""
-rp_registerFunction "103" "Atari 800 emulator             " "sources_atari800"        "build_atari800"          "install_atari800"          "configure_atari800"        ""
-rp_registerFunction "104" "Armstrad CPC emulator          " "sources_cpc"             "build_cpc"               "install_cpc"               "configure_cpc"             ""
-rp_registerFunction "105" "DOS Emulator Dosbox            " ""                        ""                        "install_dosbox"            "configure_dosbox"          ""
-rp_registerFunction "106" "Atari2600 emulator STELLA      " ""                        ""                        "install_stella"            "configure_stella"          ""
-rp_registerFunction "107" "Macintosh emulator             " "sources_basilisk"        "build_basilisk"          "install_basilisk"          "configure_basilisk"        ""
-rp_registerFunction "108" "C64 emulator VICE              " "sources_vice"            "build_vice"              "install_vice"              "configure_vice"            ""
-rp_registerFunction "109" "C64 ROMs                       " ""                        ""                        "install_c64roms"           ""                          ""
-rp_registerFunction "110" "Duke3D Port                    " ""                        ""                        "install_eduke32"           ""                          ""
-rp_registerFunction "111" "GameBoy Advance emulator       " "sources_gpsp"            "build_gpsp"              ""                          "configure_gpsp"            ""
-rp_registerFunction "112" "NeoGeo emulator GnGeoPi        " "sources_gngeopi"         "build_gngeopi"           "install_gngeopi"           "configure_gngeopi"         ""
-rp_registerFunction "113" "Atari emulator Hatari          " ""                        ""                        "install_hatari"            ""                          ""
-rp_registerFunction "114" "MAME emulator MAME4All-Pi      " "sources_mame4all"        "build_mame4all"          ""                          "configure_mame4all"        ""
-rp_registerFunction "115" "Gamegear emulator Osmose       " "sources_osmose"          "build_osmose"            "install_osmose"            "configure_osmose"          ""
-rp_registerFunction "116" "Intellivision emulator         " "sources_jzint"           "build_jzint"             ""                          "configure_jzint"           ""
-rp_registerFunction "117" "Apple 2 emulator Linapple      " "sources_linapple"        "build_linapple"          ""                          "configure_linapple"        ""
-rp_registerFunction "118" "N64 emulator MUPEN64Plus-RPi   " "sources_mupen64rpi"      "build_mupen64rpi"        ""                          "configure_mupen64rpi"      ""
-rp_registerFunction "119" "SNES emulator SNES9X           " "sources_snes9x"          "build_snes9x"            ""                          "configure_snes9x"          ""
-rp_registerFunction "120" "FBA emulator PiFBA             " "sources_pifba"           "build_pifba"             ""                          "configure_pifba"           ""
-rp_registerFunction "121" "SNES emulator PiSNES           " "sources_pisnes"          "build_pisnes"            ""                          "configure_pisnes"          ""
-rp_registerFunction "122" "DOS Emulator rpix86            " ""                        ""                        "install_rpix86"            "configure_rpix86"          ""
-rp_registerFunction "123" "ScummVM                        " ""                        ""                        "install_scummvm"           ""                          ""
-rp_registerFunction "124" "ZMachine                       " ""                        ""                        "install_zmachine"          ""                          ""
-rp_registerFunction "125" "ZXSpectrum emulator Fuse       " ""                        ""                        "install_zxspectrum"        ""                          ""
-rp_registerFunction "126" "ZXSpectrum emulator FBZX       " "sources_fbzx"            "build_fbzx"              ""                          ""                          ""
-rp_registerFunction "127" "MSX emulator OpenMSX           " "sources_openmsx"         "build_openmsx"           ""                          "configure_openmsx"         ""
+# Emulator components (emulators.shinc)
+rp_registerFunction "100" "RetroArch                      " "sources_retroarch"       "build_retroarch"         "install_retroarch"         "configure_retroarch"        ""
+rp_registerFunction "101" "AdvMame                        " "sources_advmame"         "build_advmame"           "install_advmame"           "configure_advmame"          ""
+rp_registerFunction "102" "Amiga emulator UAE4All         " "sources_uae4all"         "build_uae4all"           "install_uae4all"           "configure_uae4all"          ""
+rp_registerFunction "103" "Atari 800 emulator             " "sources_atari800"        "build_atari800"          "install_atari800"          "configure_atari800"         ""
+rp_registerFunction "104" "Armstrad CPC emulator          " "sources_cpc"             "build_cpc"               "install_cpc"               "configure_cpc"              ""
+rp_registerFunction "105" "DOS Emulator Dosbox            " ""                        ""                        "install_dosbox"            "configure_dosbox"           ""
+rp_registerFunction "106" "Atari2600 emulator STELLA      " ""                        ""                        "install_stella"            "configure_stella"           ""
+rp_registerFunction "107" "Macintosh emulator             " "sources_basilisk"        "build_basilisk"          "install_basilisk"          "configure_basilisk"         ""
+rp_registerFunction "108" "C64 emulator VICE              " "sources_vice"            "build_vice"              "install_vice"              "configure_vice"             ""
+rp_registerFunction "109" "C64 ROMs                       " ""                        ""                        "install_c64roms"           ""                           ""
+rp_registerFunction "110" "Duke3D Port                    " ""                        ""                        "install_eduke32"           ""                           ""
+rp_registerFunction "111" "GameBoy Advance emulator       " "sources_gpsp"            "build_gpsp"              ""                          "configure_gpsp"             ""
+rp_registerFunction "112" "NeoGeo emulator GnGeoPi        " "sources_gngeopi"         "build_gngeopi"           "install_gngeopi"           "configure_gngeopi"          ""
+rp_registerFunction "113" "Atari emulator Hatari          " ""                        ""                        "install_hatari"            ""                           ""
+rp_registerFunction "114" "MAME emulator MAME4All-Pi      " "sources_mame4all"        "build_mame4all"          ""                          "configure_mame4all"         ""
+rp_registerFunction "115" "Gamegear emulator Osmose       " "sources_osmose"          "build_osmose"            "install_osmose"            "configure_osmose"           ""
+rp_registerFunction "116" "Intellivision emulator         " "sources_jzint"           "build_jzint"             ""                          "configure_jzint"            ""
+rp_registerFunction "117" "Apple 2 emulator Linapple      " "sources_linapple"        "build_linapple"          ""                          "configure_linapple"         ""
+rp_registerFunction "118" "N64 emulator MUPEN64Plus-RPi   " "sources_mupen64rpi"      "build_mupen64rpi"        ""                          "configure_mupen64rpi"       ""
+rp_registerFunction "119" "SNES emulator SNES9X           " "sources_snes9x"          "build_snes9x"            ""                          "configure_snes9x"           ""
+rp_registerFunction "120" "FBA emulator PiFBA             " "sources_pifba"           "build_pifba"             ""                          "configure_pifba"            ""
+rp_registerFunction "121" "SNES emulator PiSNES           " "sources_pisnes"          "build_pisnes"            ""                          "configure_pisnes"           ""
+rp_registerFunction "122" "DOS Emulator rpix86            " ""                        ""                        "install_rpix86"            "configure_rpix86"           ""
+rp_registerFunction "123" "ScummVM                        " ""                        ""                        "install_scummvm"           ""                           ""
+rp_registerFunction "124" "ZMachine                       " ""                        ""                        "install_zmachine"          ""                           ""
+rp_registerFunction "125" "ZXSpectrum emulator Fuse       " ""                        ""                        "install_zxspectrum"        ""                           ""
+rp_registerFunction "126" "ZXSpectrum emulator FBZX       " "sources_fbzx"            "build_fbzx"              ""                          ""                           ""
+rp_registerFunction "127" "MSX emulator OpenMSX           " "sources_openmsx"         "build_openmsx"           ""                          "configure_openmsx"          ""
 
-# LibretroCore components
-rp_registerFunction "200" "SNES LibretroCore PocketSNES   " "sources_pocketsnes"       "build_pocketsnes"       "install_pocketsnes"        "configure_pocketsnes"      ""
-rp_registerFunction "201" "Genesis LibretroCore Picodrive " "sources_picodrive"        "build_picodrive"        "install_picodrive"         "configure_picodrive"       ""
-rp_registerFunction "202" "Atari 2600 LibretroCore Stella " "sources_stellalibretro"   "build_stellalibretro"   ""                          "configure_stellalibretro"  ""
-rp_registerFunction "203" "Cave Story LibretroCore        " "sources_cavestory"        "build_cavestory"        ""                          "configure_cavestory"       ""
-rp_registerFunction "204" "Doom LibretroCore              " "sources_doom"             "build_doom"             ""                          "configure_doom"            ""
-rp_registerFunction "205" "Gameboy Color LibretroCore     " "sources_gbclibretro"      "build_gbclibretro"      ""                          "configure_gbclibretro"     ""
-rp_registerFunction "206" "MAME LibretroCore              " "sources_mamelibretro"     "build_mamelibretro"     ""                          "configure_mamelibretro"    ""
-rp_registerFunction "207" "FBA LibretroCore               " "sources_fbalibretro"      "build_fbalibretro"      ""                          "configure_fbalibretro"     ""
-rp_registerFunction "208" "NES LibretroCore fceu-next     " "sources_neslibretro"      "build_neslibretro"      ""                          "configure_neslibretro"     ""
-rp_registerFunction "209" "Genesis/Megadrive LibretroCore " "sources_genesislibretro"  "build_genesislibretro"  ""                          "configure_genesislibretro" ""
-rp_registerFunction "210" "TurboGrafx 16 LibretroCore     " "sources_turbografx16"     "build_turbografx16"     ""                          "configure_turbografx16"    ""
-rp_registerFunction "211" "Playstation 1 LibretroCore     " "sources_psxlibretro"      "build_psxlibretro"      ""                          "configure_psxlibretro"     ""
+# LibretroCore components (libretrocores.shinc)
+rp_registerFunction "200" "SNES LibretroCore PocketSNES   " "sources_pocketsnes"       "build_pocketsnes"       "install_pocketsnes"        "configure_pocketsnes"       ""
+rp_registerFunction "201" "Genesis LibretroCore Picodrive " "sources_picodrive"        "build_picodrive"        "install_picodrive"         "configure_picodrive"        ""
+rp_registerFunction "202" "Atari 2600 LibretroCore Stella " "sources_stellalibretro"   "build_stellalibretro"   ""                          "configure_stellalibretro"   ""
+rp_registerFunction "203" "Cave Story LibretroCore        " "sources_cavestory"        "build_cavestory"        ""                          "configure_cavestory"        ""
+rp_registerFunction "204" "Doom LibretroCore              " "sources_doom"             "build_doom"             ""                          "configure_doom"             ""
+rp_registerFunction "205" "Gameboy Color LibretroCore     " "sources_gbclibretro"      "build_gbclibretro"      ""                          "configure_gbclibretro"      ""
+rp_registerFunction "206" "MAME LibretroCore              " "sources_mamelibretro"     "build_mamelibretro"     ""                          "configure_mamelibretro"     ""
+rp_registerFunction "207" "FBA LibretroCore               " "sources_fbalibretro"      "build_fbalibretro"      ""                          "configure_fbalibretro"      ""
+rp_registerFunction "208" "NES LibretroCore fceu-next     " "sources_neslibretro"      "build_neslibretro"      ""                          "configure_neslibretro"      ""
+rp_registerFunction "209" "Genesis/Megadrive LibretroCore " "sources_genesislibretro"  "build_genesislibretro"  ""                          "configure_genesislibretro"  ""
+rp_registerFunction "210" "TurboGrafx 16 LibretroCore     " "sources_turbografx16"     "build_turbografx16"     ""                          "configure_turbografx16"     ""
+rp_registerFunction "211" "Playstation 1 LibretroCore     " "sources_psxlibretro"      "build_psxlibretro"      ""                          "configure_psxlibretro"      ""
 
-# Supplementary components
-rp_registerFunction "300" "Update APT packages            " ""                         ""                       "install_APTPackages" "" ""
-rp_registerFunction "301" "Package Repository             " ""                         ""                       "install_PackageRepository" "" ""
-rp_registerFunction "302" "SDL 2.0.1                      " "sources_sdl"              "build_sdl"              "install_sdl"               "" ""
+# Supplementary components (supplementary.shinc)
+rp_registerFunction "300" "Update APT packages            " ""                         ""                       "install_APTPackages"       ""                           ""
+rp_registerFunction "301" "Package Repository             " ""                         ""                       "install_PackageRepository" ""                           ""
+rp_registerFunction "302" "SDL 2.0.1                      " "sources_sdl"              "build_sdl"              "install_sdl"               ""                           ""
 rp_registerFunction "303" "EmulationStation               " "sources_EmulationStation" "build_EmulationStation" "install_EmulationStation"  "configure_EmulationStation" "package_EmulationStation"
-rp_registerFunction "304" "EmulationStation Theme Simple  " ""                         ""                       "install_ESThemeSimple"     "" ""
-rp_registerFunction "305" "Video mode script 'runcommand' " ""                         ""                       "install_runcommand"        "" ""
+rp_registerFunction "304" "EmulationStation Theme Simple  " ""                         ""                       "install_ESThemeSimple"     ""                           ""
+rp_registerFunction "305" "Video mode script 'runcommand' " ""                         ""                       "install_runcommand"        ""                           ""
+rp_registerFunction "306" "SNESDev                        " "sources_snesdev"          "build_snesdev"          "install_snesdev"           "configure_snesdev"          ""
+rp_registerFunction "307" "Xarcade2Jstick                 " "sources_xarcade2jstick"   "build_xarcade2jstick"   "install_xarcade2jstick"    "configure_xarcade2jstick"   ""
+rp_registerFunction "308" "RetroArch-AutoConfigs          " ""                         ""                       "install_retroarchautoconf" ""                           ""
+rp_registerFunction "309" "Bash Welcome Tweak             " ""                         ""                       "install_bashwelcometweak"  ""                           ""
+rp_registerFunction "310" "Samba ROM Shares               " ""                         ""                       "install_sambashares"       "configure_sambashares"      ""
+rp_registerFunction "311" "USB ROM Service                " ""                         ""                       "install_usbromservice"     "configure_usbromservice"    ""
+rp_registerFunction "312" "Splashscreen                   " ""                         ""                       ""                          "configure_splashscreen"     ""
+rp_registerFunction "313" "RetroNetplay                   " ""                         ""                       ""                          "configure_retronetplay"     ""
+rp_registerFunction "314" "Modules UInput, Joydev, ALSA   " ""                         ""                       "install_modules"           ""                           ""
+rp_registerFunction "315" "Set avoid_safe_mode            " ""                         ""                       "install_setavoidsafemode"  ""                           ""
+rp_registerFunction "316" "Disable system timeouts        " ""                         ""                       "install_disabletimeouts"   ""                           ""
+rp_registerFunction "317" "Handle APT packages            " ""                         ""                       "install_handleaptpackages" ""                           ""
+
+# TODO RAM-configuration, ES-autostart, python scripts (es-config), download binaries, xbox360 controllers, PS3 controllers, register controller for Retroarch
 
 # ==========================================================================
 # ==========================================================================

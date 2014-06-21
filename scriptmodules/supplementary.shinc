@@ -499,3 +499,456 @@ function install_runcommand() {
     cp $scriptdir/supplementary/runcommand.sh "$rootdir/supplementary/runcommand/"
     chmod +x "$rootdir/supplementary/runcommand/runcommand.sh"
 }
+
+function sources_snesdev() {
+    printMsg "Getting sources of snesdev"
+    gitPullOrClone "$rootdir/supplementary/SNESDev-Rpi" git://github.com/petrockblog/SNESDev-RPi.git
+}
+
+function build_snesdev() {
+    printMsg "Building snesdev"
+    pushd "$rootdir/supplementary/SNESDev-Rpi"
+    ./build.sh
+    popd
+}
+
+function install_snesdev() {
+    printMsg "Installing snesdev"
+    if [[ ! -f "$rootdir/supplementary/SNESDev-Rpi/SNESDev" ]]; then
+        __ERRMSGS="$__ERRMSGS Could not successfully compile SNESDev."  
+    else
+        service SNESDev stop
+        cp "$rootdir/supplementary/SNESDev-Rpi/SNESDev" /usr/local/bin/
+    fi    
+    cp "$rootdir/supplementary/SNESDev-Rpi/supplementary/snesdev.cfg" /etc/
+}
+
+# start SNESDev on boot and configure RetroArch input settings
+function sup_enableSNESDevAtStart()
+{
+    clear
+    printMsg "Enabling SNESDev on boot."
+
+    if [[ ! -f "/etc/init.d/SNESDev" ]]; then
+        if [[ ! -f "$rootdir/supplementary/SNESDev-Rpi/SNESDev" ]]; then
+            dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --msgbox "Cannot find SNESDev binary. Please install SNESDev." 22 76    
+            return
+        else
+            echo "Copying service script for SNESDev to /etc/init.d/ ..."
+            chmod +x "$rootdir/supplementary/SNESDev-Rpi/scripts/SNESDev"
+            cp "$rootdir/supplementary/SNESDev-Rpi/scripts/SNESDev" /etc/init.d/
+        fi
+    fi
+
+    echo "Copying SNESDev to /usr/local/bin/ ..."
+    cp "$rootdir/supplementary/SNESDev-Rpi/SNESDev" /usr/local/bin/
+
+    case $1 in
+      1)
+        ensureKeyValueBootconfig "button_enabled" "0" "/etc/snesdev.cfg"
+        ensureKeyValueBootconfig "gamepad1_enabled" "1" "/etc/snesdev.cfg"
+        ensureKeyValueBootconfig "gamepad2_enabled" "1" "/etc/snesdev.cfg"
+        ;;
+      2)
+        ensureKeyValueBootconfig "button_enabled" "1" "/etc/snesdev.cfg"
+        ensureKeyValueBootconfig "gamepad1_enabled" "0" "/etc/snesdev.cfg"
+        ensureKeyValueBootconfig "gamepad2_enabled" "0" "/etc/snesdev.cfg"
+        ;;
+      3)
+        ensureKeyValueBootconfig "button_enabled" "1" "/etc/snesdev.cfg"
+        ensureKeyValueBootconfig "gamepad1_enabled" "1" "/etc/snesdev.cfg"
+        ensureKeyValueBootconfig "gamepad2_enabled" "1" "/etc/snesdev.cfg"
+        ;;
+      *)
+        echo "[sup_enableSNESDevAtStart] I do not understand what is going on here."
+        ;;
+    esac
+
+    # This command installs the init.d script so it automatically starts on boot
+    update-rc.d SNESDev defaults
+    # This command starts the daemon now so no need for a reboot
+    service SNESDev start
+}
+
+# disable start SNESDev on boot and remove RetroArch input settings
+function sup_disableSNESDevAtStart()
+{
+    clear
+    printMsg "Disabling SNESDev on boot."
+
+    # This command stops the daemon now so no need for a reboot
+    service SNESDev stop
+
+    # This command installs the init.d script so it automatically starts on boot
+    update-rc.d SNESDev remove
+}
+
+function configure_snesdev() {
+    printMsg "Configuring snesdev"
+    cmd=(dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --menu "Choose the desired boot behaviour." 22 86 16)
+    options=(1 "Disable SNESDev on boot and SNESDev keyboard mapping."
+             2 "Enable SNESDev on boot and SNESDev keyboard mapping (polling pads and button)."
+             3 "Enable SNESDev on boot and SNESDev keyboard mapping (polling only pads)."
+             4 "Enable SNESDev on boot and SNESDev keyboard mapping (polling only button).")
+    choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
+    if [ "$choices" != "" ]; then
+        case $choices in
+            1) sup_disableSNESDevAtStart
+               dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --msgbox "Disabled SNESDev on boot." 22 76    
+                            ;;
+            2) sup_enableSNESDevAtStart 3
+               dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --msgbox "Enabled SNESDev on boot (polling pads and button)." 22 76    
+                            ;;
+            3) sup_enableSNESDevAtStart 1
+               dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --msgbox "Enabled SNESDev on boot (polling only pads)." 22 76    
+                            ;;
+            4) sup_enableSNESDevAtStart 2
+               dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --msgbox "Enabled SNESDev on boot (polling only button)." 22 76    
+                            ;;
+        esac
+    else
+        break
+    fi  
+}
+
+function sources_xarcade2jstick() {
+    printMsg "Getting sources of xarcade2jstick"
+    gitPullOrClone "$rootdir/supplementary/Xarcade2Jstick/" https://github.com/petrockblog/Xarcade2Joystick.git
+}
+
+function build_xarcade2jstick() {
+    printMsg "Building xarcade2jstick"
+    pushd "$rootdir/supplementary/Xarcade2Jstick/"
+    make
+    popd
+}
+
+function install_xarcade2jstick() {
+    printMsg "Installing xarcade2jstick"
+    pushd "$rootdir/supplementary/Xarcade2Jstick/"
+    make install
+    popd
+}
+
+function configure_xarcade2jstick() {
+    printMsg "Configuring xarcade2jstick"
+    cmd=(dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --menu "Choose the desired boot behaviour." 22 86 16)
+    options=(1 "Disable Xarcade2Jstick service."
+             2 "Enable Xarcade2Jstick service." )
+    choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
+    if [ "$choices" != "" ]; then
+        case $choices in
+            1) sup_checkInstallXarcade2Jstick
+               pushd "$rootdir/supplementary/Xarcade2Jstick/"
+               make uninstallservice
+               popd
+               dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --msgbox "Disabled Xarcade2Jstick." 22 76    
+                            ;;
+            2) sup_checkInstallXarcade2Jstick
+               pushd "$rootdir/supplementary/Xarcade2Jstick/"
+               make installservice
+               popd
+               dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --msgbox "Enabled Xarcade2Jstick service." 22 76    
+                            ;;
+        esac
+    else
+        break
+    fi   
+}
+
+function install_retroarchautoconf() {
+    printMsg "Installing retroarchautoconf"
+
+    if [[ ! -d "$rootdir/emulators/RetroArch/configs/" ]]; then
+        mkdir -p "$rootdir/emulators/RetroArch/configs/"
+    fi
+    cp $scriptdir/supplementary/RetroArchConfigs/*.cfg "$rootdir/emulators/RetroArch/configs/"    
+}
+
+function install_bashwelcometweak() {
+    printMsg "Installing Bash Welcome Tweak"
+
+    if [[ -z `cat "/home/$user/.bashrc" | grep "# RETROPIE PROFILE START"` ]]; then
+        cat $scriptdir/supplementary/ProfileTweak >> "/home/$user/.bashrc"
+    fi    
+}
+
+function set_ensureEntryInSMBConf()
+{
+    comp=`cat /etc/samba/smb.conf | grep "\[$1\]"`
+    if [ "$comp" == "[$1]" ]; then
+      echo "$1 already contained in /etc/samba/smb.conf."
+    else
+    chmod 666 /etc/samba/smb.conf
+    tee -a /etc/samba/smb.conf <<HDHD
+[$1]
+comment = $1
+path = $rootdir/roms/$2
+writeable = yes
+guest ok = yes
+create mask = 0777
+directory mask = 0777
+read only = no
+browseable = yes
+force user = $user
+public = yes
+HDHD
+    fi
+    chmod 644 /etc/samba/smb.conf
+}
+
+function install_sambashares() {
+    printMsg "Installing sambashares"
+
+    apt-get update
+    apt-get install -y samba samba-common-bin
+}
+
+function configure_sambashares() {
+    printMsg "Configuring sambashares"
+
+    set_ensureEntryInSMBConf "AMIGA" "amiga"
+    set_ensureEntryInSMBConf "APPLE2" "apple2"
+    set_ensureEntryInSMBConf "ATARI2600" "atari2600"
+    set_ensureEntryInSMBConf "ATARISTSTEFALCON" "atariStSteFalcon"
+    set_ensureEntryInSMBConf "MAC" "macintosh"
+    set_ensureEntryInSMBConf "BIOSFILES" "../BIOS"
+    set_ensureEntryInSMBConf "C64" "c64"
+    set_ensureEntryInSMBConf "DOOM" "ports/doom"
+    set_ensureEntryInSMBConf "DUKE3D" "ports/duke3d"
+    set_ensureEntryInSMBConf "GAMEGEAR" "gamegear"
+    set_ensureEntryInSMBConf "FBA" "fba"
+    set_ensureEntryInSMBConf "GB" "gb"
+    set_ensureEntryInSMBConf "GBA" "gba"
+    set_ensureEntryInSMBConf "GBC" "gbc"
+    set_ensureEntryInSMBConf "INTELLIVISION" "intellivision"
+    set_ensureEntryInSMBConf "MAME" "mame"
+    set_ensureEntryInSMBConf "MASTERSYSTEM" "mastersystem"
+    set_ensureEntryInSMBConf "MEGADRIVE" "megadrive"
+    set_ensureEntryInSMBConf "NEOGEO" "neogeo"
+    set_ensureEntryInSMBConf "NES" "nes"
+    set_ensureEntryInSMBConf "N64" "n64"
+    set_ensureEntryInSMBConf "PC" "pc"
+    set_ensureEntryInSMBConf "PCENGINE" "pcengine"
+    set_ensureEntryInSMBConf "PSX" "psx"
+    set_ensureEntryInSMBConf "PPSSPP" "psp"
+    set_ensureEntryInSMBConf "SNES" "snes"
+    set_ensureEntryInSMBConf "SCUMMVM" "scummvm"
+    set_ensureEntryInSMBConf "ZMACHINE" "zmachine"
+    set_ensureEntryInSMBConf "ZXSPECTRUM" "zxspectrum"
+
+    /etc/init.d/samba restart
+
+    dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --msgbox "The SAMBA shares can be accessed with a guest account" 22 76    
+}
+
+function install_usbromservice() {
+    printMsg "Installing usbromservice"
+    
+    # install usbmount package
+    apt-get install -y usbmount
+}
+
+function configure_usbromservice() {
+    printMsg "Configuring usbromservice"
+
+    # install hook in usbmount sub-directory
+    cp $scriptdir/supplementary/01_retropie_copyroms /etc/usbmount/mount.d/
+    sed -i -e "s/USERTOBECHOSEN/$user/g" /etc/usbmount/mount.d/01_retropie_copyroms
+    chmod +x /etc/usbmount/mount.d/01_retropie_copyroms    
+}
+
+function configure_splashscreen() {
+    printMsg "Configuring splashscreen"
+
+    local options
+    local ctr
+
+    ctr=0
+    pushd $scriptdir/supplementary/splashscreens/ > /dev/null
+    options=()
+    dirlist=()
+    for splashdir in $(find . -type d | sort) ; do
+        if [[ $splashdir != "." ]]; then
+            options+=($ctr "${splashdir:2}")
+            dirlist+=(${splashdir:2})
+            ctr=$((ctr + 1))
+        fi
+    done
+    popd > /dev/null
+    cmd=(dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --menu "Choose splashscreen." 22 76 16)
+    __ERRMSGS=""
+    __INFMSGS=""
+    choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)    
+    splashdir=${dirlist[$choices]}
+    if [ "$choices" != "" ]; then
+        rm /etc/splashscreen.list
+        find $scriptdir/supplementary/splashscreens/$splashdir/ -type f | sort | while read line; do
+            echo $line >> /etc/splashscreen.list
+        done
+        dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --msgbox "Splashscreen set to '$splashdir'." 20 60  
+    else
+        break
+    fi    
+}
+
+function configure_retronetplay() {
+    printMsg "Configuring retronetplay"
+
+    ipaddress_int=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
+    ipaddress_ext=$(curl http://ipecho.net/plain; echo)
+    while true; do
+        cmd=(dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --menu "Configure RetroArch Netplay.\nInternal IP: $ipaddress_int\nExternal IP: $ipaddress_ext" 22 76 16)
+        options=(1 "(E)nable/(D)isable RetroArch Netplay. Currently: $__netplayenable" 
+                 2 "Set mode, (H)ost or (C)lient. Currently: $__netplaymode" 
+                 3 "Set port. Currently: $__netplayport" 
+                 4 "Set host IP address (for client mode). Currently: $__netplayhostip"
+                 5 "Set delay frames. Currently: $__netplayframes" )
+        choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)    
+        if [ "$choices" != "" ]; then
+            case $choices in
+                 1) rps_retronet_enable ;;
+                 2) rps_retronet_mode ;;
+                 3) rps_retronet_port ;;
+                 4) rps_retronet_hostip ;;
+                 5) rps_retronet_frames ;;
+            esac
+        else
+            break
+        fi
+    done      
+}
+
+function rps_retronet_enable() {
+    cmd=(dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --menu "Enable or disable RetroArch's Netplay mode." 22 76 16)
+    options=(1 "ENABLE netplay" 
+             2 "DISABLE netplay" )
+    choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)    
+    if [ "$choices" != "" ]; then
+        case $choices in
+             1) __netplayenable="E" 
+                ;;
+             2) __netplayenable="D" 
+                ;;
+        esac
+        rps_retronet_saveconfig
+        sup_generate_esconfig
+    fi
+}
+
+function rps_retronet_mode() {
+    cmd=(dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --menu "Please set the netplay mode." 22 76 16)
+    options=(1 "Set as HOST" 
+             2 "Set as CLIENT" )
+    choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)    
+    if [ "$choices" != "" ]; then
+        case $choices in
+             1) __netplaymode="H" 
+                __netplayhostip_cfile=""
+                ;;
+             2) __netplaymode="C" 
+                __netplayhostip_cfile="$__netplayhostip"
+                ;;
+        esac
+        rps_retronet_saveconfig
+        sup_generate_esconfig
+    fi
+}
+
+function rps_retronet_port() {
+    cmd=(dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --inputbox "Please enter the port to be used for netplay (default: 55435)." 22 76 $__netplayport)
+    choices=$("${cmd[@]}" 2>&1 >/dev/tty)    
+    if [ "$choices" != "" ]; then
+        __netplayport=$choices
+        rps_retronet_saveconfig
+        sup_generate_esconfig
+    fi  
+}
+
+function rps_retronet_hostip() {
+    cmd=(dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --inputbox "Please enter the IP address of the host." 22 76 $__netplayhostip)
+    choices=$("${cmd[@]}" 2>&1 >/dev/tty)    
+    if [ "$choices" != "" ]; then
+        __netplayhostip=$choices
+        if [[ $__netplaymode == "H" ]]; then
+            __netplayhostip_cfile=""
+        else
+            __netplayhostip_cfile="$__netplayhostip"
+        fi
+        rps_retronet_saveconfig
+        sup_generate_esconfig
+    fi  
+}
+
+function rps_retronet_frames() {
+    cmd=(dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --inputbox "Please enter the number of delay frames for netplay (default: 15)." 22 76 $__netplayframes)
+    choices=$("${cmd[@]}" 2>&1 >/dev/tty)    
+    if [ "$choices" != "" ]; then
+        __netplayframes=$choices
+        rps_retronet_saveconfig
+        sup_generate_esconfig
+    fi  
+}
+
+function rps_retronet_saveconfig() {
+    echo -e "__netplayenable=\"$__netplayenable\"\n__netplaymode=\"$__netplaymode\"\n__netplayport=\"$__netplayport\"\n__netplayhostip=\"$__netplayhostip\"\n__netplayhostip_cfile=\"$__netplayhostip_cfile\"\n__netplayframes=\"$__netplayframes\"" > $scriptdir/configs/retronetplay.cfg
+}
+
+function install_modules() {
+    printMsg "Installing modules"
+
+    modprobe snd_bcm2835
+    modprobe uinput
+    modprobe joydev
+
+    if ! grep -q "uinput" /etc/modules; then
+        addLineToFile "uinput" "/etc/modules"
+    else
+        echo -e "uinput module already contained in /etc/modules"
+    fi
+    if ! grep -q "joydev" /etc/modules; then
+        addLineToFile "joydev" "/etc/modules"
+    else
+        echo -e "joydev module already contained in /etc/modules"
+    fi  
+}
+
+function install_setavoidsafemode() {
+    printMsg "Installing setavoidsafemode"
+
+    ensureKeyValueBootconfig "avoid_safe_mode" 1 "/boot/config.txt"    
+}
+
+function install_disabletimeouts() {
+    printMsg "Disabling blank and powerdown timeouts in /etc/kbd/config"
+
+    sed -i 's/BLANK_TIME=30/BLANK_TIME=0/g' /etc/kbd/config
+    sed -i 's/POWERDOWN_TIME=30/POWERDOWN_TIME=0/g' /etc/kbd/config    
+}
+
+function install_handleaptpackages() {
+    printMsg "Handling APT packages"
+    
+    # remove PulseAudio since this is slowing down the whole system significantly. Cups is also not needed
+    apt-get remove -y pulseaudio cups
+    apt-get -y autoremove    
+}
+
+# --------------------------------------
+
+# function sources_XXX() {
+#     printMsg "Getting sources of XXX"
+# }
+
+# function build_XXX() {
+#     printMsg "Building XXX"
+# }
+
+# function install_XXX() {
+#     printMsg "Installing XXX"
+# }
+
+# function configure_XXX() {
+#     printMsg "Configuring XXX"
+# }
+

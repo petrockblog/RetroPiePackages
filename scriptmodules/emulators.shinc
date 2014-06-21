@@ -30,9 +30,8 @@ function configure_retroarch() {
     if [[ ! -d "$rootdir/emulators/RetroArch/configs/" ]]; then
         mkdir -p "$rootdir/emulators/RetroArch/configs/"
     fi
-    cp $scriptdir/supplementary/RetroArchConfigs/*.cfg "$rootdir/emulators/RetroArch/configs/"
 
-   if [[ ! -f "$rootdir/configs/all/retroarch.cfg" ]]; then
+    if [[ ! -f "$rootdir/configs/all/retroarch.cfg" ]]; then
         mkdir -p "$rootdir/configs/all/"
         mkdir -p "$rootdir/configs/atari2600/"
         echo -e "# All settings made here will override the global settings for the current emulator core\n" >> $rootdir/configs/atari2600/retroarch.cfg
