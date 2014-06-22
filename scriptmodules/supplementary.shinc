@@ -93,9 +93,20 @@ function build_EmulationStation() {
 function install_EmulationStation() {
 	printMsg "Installing EmulationStation"
 
-    # if [[ ! -f /usr/lib/libEGL.so ]]; then
-    #     ln -fs /opt/vc/lib/libEGL.so /usr/lib/libEGL.so
-    # fi
+    cat > /usr/bin/emulationstation << _EOF_
+#!/bin/bash
+
+es_bin="$rootdir/supplementary/EmulationStation/emulationstation"
+
+nb_lock_files=\$(find /tmp -name ".X?-lock" | wc -l)
+if [ \$nb_lock_files -ne 0 ]; then
+    echo "X is running. Please shut down X in order to mitigate problems with loosing keyboard input. For example, logout from LXDE."
+    exit 1
+fi
+
+\$es_bin "\$@"
+_EOF_
+    chmod +x /usr/bin/emulationstation
 
 	if [[ -f "$rootdir/supplementary/EmulationStation/emulationstation" ]]; then
 		return 0
@@ -273,7 +284,7 @@ function configure_EmulationStation() {
         <name>msx</name>
         <path>~/RetroPie/roms/msx</path>
         <extension>.rom .ROM</extension>
-        <command>$rootdir/supplementary/runcommand/runcommand.sh 4 "$rootdir/emulators/openmsx-0.10.0 %BASENAME%"</command>
+        <command>$rootdir/supplementary/runcommand/runcommand.sh 4 "$rootdir/emulators/openmsx-0.10.0/derived/arm-linux-opt/bin/openmsx %BASENAME%"</command>
         <platform></platform>
         <theme>msx</theme>
     </system>    
@@ -758,6 +769,25 @@ function configure_usbromservice() {
     chmod +x /etc/usbmount/mount.d/01_retropie_copyroms    
 }
 
+function configure_splashenable() {
+    cmd=(dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --menu "Choose the desired boot behaviour." 22 86 16)
+    options=(1 "Disable custom splashscreen on boot."
+             2 "Enable custom splashscreen on boot")
+    choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
+    if [ "$choices" != "" ]; then
+        case $choices in
+            1) set_disableSplashscreenAtStart
+               dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --msgbox "Disabled custom splashscreen on boot." 22 76    
+                            ;;
+            2) set_enableSplashscreenAtStart
+               dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --msgbox "Enabled custom splashscreen on boot." 22 76    
+                            ;;
+        esac
+    else
+        break
+    fi     
+}
+
 function configure_splashscreen() {
     printMsg "Configuring splashscreen"
 
@@ -897,7 +927,6 @@ function rps_retronet_saveconfig() {
 function install_modules() {
     printMsg "Installing modules"
 
-    modprobe snd_bcm2835
     modprobe uinput
     modprobe joydev
 
@@ -928,10 +957,35 @@ function install_disabletimeouts() {
 
 function install_handleaptpackages() {
     printMsg "Handling APT packages"
-    
+
     # remove PulseAudio since this is slowing down the whole system significantly. Cups is also not needed
     apt-get remove -y pulseaudio cups
     apt-get -y autoremove    
+}
+
+function configure_autostartemustat() {
+    cmd=(dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --menu "Choose the desired boot behaviour." 22 76 16)
+    options=(1 "Original boot behaviour"
+             2 "Start Emulation Station at boot.")
+    choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
+    if [ "$choices" != "" ]; then
+        case $choices in
+            1) sed /etc/inittab -i -e "s|1:2345:respawn:/bin/login -f $user tty1 </dev/tty1 >/dev/tty1 2>&1|1:2345:respawn:/sbin/getty --noclear 38400 tty1|g"
+               sed /etc/profile -i -e "/emulationstation/d"
+               dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --msgbox "Enabled original boot behaviour. ATTENTION: If you still have the custom splash screen enabled (via this script), you need to jump between consoles after booting via Ctrl+Alt+F2 and Ctrl+Alt+F1 to see the login prompt. You can restore the original boot behavior of the RPi by disabling the custom splash screen with this script." 22 76    
+                            ;;
+            2) sed /etc/inittab -i -e "s|1:2345:respawn:/sbin/getty --noclear 38400 tty1|1:2345:respawn:\/bin\/login -f $user tty1 \<\/dev\/tty1 \>\/dev\/tty1 2\>\&1|g"
+               update-rc.d lightdm disable 2 # taken from /usr/bin/raspi-config
+               if [ -z $(egrep -i "emulationstation$" /etc/profile) ]
+               then
+                   echo "[ -n \"\${SSH_CONNECTION}\" ] || emulationstation" >> /etc/profile
+               fi
+               dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --msgbox "Emulation Station is now starting on boot." 22 76    
+                            ;;
+        esac
+    else
+        break
+    fi        
 }
 
 # --------------------------------------

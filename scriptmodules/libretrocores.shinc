@@ -54,14 +54,10 @@ function build_pocketsnes() {
     popd
 }
 
-function install_pocketsnes() {
-    printMsg "Installing Pocketsnes"
-}
-
 function configure_pocketsnes() {
     printMsg "Configuring Pocketsnes"
 
-    mkdir -p $home/RetroPie/roms/megadrive
+    mkdir -p $romdir/snes
     
     # # look for existing configuration
     # xmlstarlet sel -t -c "/systemList/system[name='snes']" -n -v test.xml
@@ -191,6 +187,7 @@ function build_gbclibretro() {
 function configure_gbclibretro() {
     printMsg "Configuring gbclibretro"
     mkdir -p $romdir/gbc
+    mkdir -p $romdir/gb
 }
 
 function sources_mamelibretro() {

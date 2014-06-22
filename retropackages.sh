@@ -251,7 +251,7 @@ rp_registerFunction "126" "ZXSpectrum emulator FBZX       " "sources_fbzx"      
 rp_registerFunction "127" "MSX emulator OpenMSX           " "sources_openmsx"         "build_openmsx"           ""                          "configure_openmsx"          ""
 
 # LibretroCore components (libretrocores.shinc)
-rp_registerFunction "200" "SNES LibretroCore PocketSNES   " "sources_pocketsnes"       "build_pocketsnes"       "install_pocketsnes"        "configure_pocketsnes"       ""
+rp_registerFunction "200" "SNES LibretroCore PocketSNES   " "sources_pocketsnes"       "build_pocketsnes"       ""                          "configure_pocketsnes"       ""
 rp_registerFunction "201" "Genesis LibretroCore Picodrive " "sources_picodrive"        "build_picodrive"        "install_picodrive"         "configure_picodrive"        ""
 rp_registerFunction "202" "Atari 2600 LibretroCore Stella " "sources_stellalibretro"   "build_stellalibretro"   ""                          "configure_stellalibretro"   ""
 rp_registerFunction "203" "Cave Story LibretroCore        " "sources_cavestory"        "build_cavestory"        ""                          "configure_cavestory"        ""
@@ -277,14 +277,16 @@ rp_registerFunction "308" "RetroArch-AutoConfigs          " ""                  
 rp_registerFunction "309" "Bash Welcome Tweak             " ""                         ""                       "install_bashwelcometweak"  ""                           ""
 rp_registerFunction "310" "Samba ROM Shares               " ""                         ""                       "install_sambashares"       "configure_sambashares"      ""
 rp_registerFunction "311" "USB ROM Service                " ""                         ""                       "install_usbromservice"     "configure_usbromservice"    ""
-rp_registerFunction "312" "Splashscreen                   " ""                         ""                       ""                          "configure_splashscreen"     ""
-rp_registerFunction "313" "RetroNetplay                   " ""                         ""                       ""                          "configure_retronetplay"     ""
-rp_registerFunction "314" "Modules UInput, Joydev, ALSA   " ""                         ""                       "install_modules"           ""                           ""
-rp_registerFunction "315" "Set avoid_safe_mode            " ""                         ""                       "install_setavoidsafemode"  ""                           ""
-rp_registerFunction "316" "Disable system timeouts        " ""                         ""                       "install_disabletimeouts"   ""                           ""
-rp_registerFunction "317" "Handle APT packages            " ""                         ""                       "install_handleaptpackages" ""                           ""
+rp_registerFunction "312" "Enable/disable Splashscreen    " ""                         ""                       ""                          "configure_splashenable"     ""
+rp_registerFunction "313" "Select Splashscreen            " ""                         ""                       ""                          "configure_splashscreen"     ""
+rp_registerFunction "314" "RetroNetplay                   " ""                         ""                       ""                          "configure_retronetplay"     ""
+rp_registerFunction "315" "Modules UInput, Joydev, ALSA   " ""                         ""                       "install_modules"           ""                           ""
+rp_registerFunction "316" "Set avoid_safe_mode            " ""                         ""                       "install_setavoidsafemode"  ""                           ""
+rp_registerFunction "317" "Disable system timeouts        " ""                         ""                       "install_disabletimeouts"   ""                           ""
+rp_registerFunction "318" "Handle APT packages            " ""                         ""                       "install_handleaptpackages" ""                           ""
+rp_registerFunction "319" "Auto-start EmulationStation    " ""                         ""                       ""                          "configure_autostartemustat" ""
 
-# TODO RAM-configuration, ES-autostart, python scripts (es-config), download binaries, xbox360 controllers, PS3 controllers, register controller for Retroarch
+# TODO RAM-configuration, python scripts (es-config), download binaries, xbox360 controllers, PS3 controllers, register controller for Retroarch
 
 # ==========================================================================
 # ==========================================================================
