@@ -1,75 +1,76 @@
 #!/bin/bash
 
+pushd "/opt"
+
+rootdir="./retropie"
+
 filelist=()
 
-filelist+=("./RetroPie/supplementary/EmulationStation/emulationstation")
-filelist+=("./RetroPie/supplementary/ES-config/")
-filelist+=("./RetroPie/supplementary/SNESDev-Rpi/SNESDev")
-filelist+=("./RetroPie/supplementary/SNESDev-Rpi/supplementary/snesdev.cfg")
-filelist+=("./RetroPie/supplementary/SNESDev-Rpi/scripts/SNESDev")
-filelist+=("./RetroPie/supplementary/dispmanx/build/.libs/")
+filelist+=("$rootdir/supplementary/EmulationStation/emulationstation")
+filelist+=("$rootdir/supplementary/SNESDev-Rpi/SNESDev")
+filelist+=("$rootdir/supplementary/SNESDev-Rpi/supplementary/snesdev.cfg")
+filelist+=("$rootdir/supplementary/SNESDev-Rpi/scripts/SNESDev")
 
-filelist+=("`find ./RetroPie/emulatorcores/stella-libretro/ -name "*libretro*.so"`")
-filelist+=("`find ./RetroPie/emulatorcores/nxengine-libretro/ -name "*libretro*.so"`")
-filelist+=("./RetroPie/emulatorcores/nxengine-libretro/datafiles/")
-filelist+=("`find ./RetroPie/emulatorcores/gambatte-libretro/ -name "*libretro*.so"`")
-filelist+=("`find ./RetroPie/emulatorcores/libretro-prboom/ -name "*libretro*.so"`")
-filelist+=("./RetroPie/emulatorcores/libretro-prboom/prboom.wad")
-filelist+=("`find ./RetroPie/emulatorcores/pocketsnes-libretro/ -name "*libretro*.so"`")
-filelist+=("`find ./RetroPie/emulatorcores/stella-libretro/ -name "*libretro*.so"`")
-filelist+=("`find ./RetroPie/emulatorcores/pcsx_rearmed/ -name "*libretro*.so"`")
-filelist+=("`find ./RetroPie/emulatorcores/mednafen-pce-libretro/ -name "*libretro*.so"`")
-filelist+=("`find ./RetroPie/emulatorcores/Genesis-Plus-GX/ -name "*libretro*.so"`")
-filelist+=("`find ./RetroPie/emulatorcores/imame4all-libretro/ -name "*libretro*.so"`")
-filelist+=("`find ./RetroPie/emulatorcores/fceu-next/fceumm-code/ -name "*libretro*.so"`")
-filelist+=("`find ./RetroPie/emulatorcores/fba-libretro/ -name "*libretro*.so"`")
-filelist+=("`find ./RetroPie/emulatorcores/picodrive/ -name "*libretro*.so"`")
+filelist+=("$(find $rootdir/emulatorcores/stella-libretro/ -name "*libretro*.so")")
+filelist+=("$(find $rootdir/emulatorcores/nxengine-libretro/ -name "*libretro*.so")")
+filelist+=("$rootdir/emulatorcores/nxengine-libretro/datafiles/")
+filelist+=("$(find $rootdir/emulatorcores/gambatte-libretro/ -name "*libretro*.so")")
+filelist+=("$(find $rootdir/emulatorcores/libretro-prboom/ -name "*libretro*.so")")
+filelist+=("$rootdir/emulatorcores/libretro-prboom/prboom.wad")
+filelist+=("$(find $rootdir/emulatorcores/pocketsnes-libretro/ -name "*libretro*.so")")
+filelist+=("$(find $rootdir/emulatorcores/pcsx_rearmed/ -name "*libretro*.so")")
+filelist+=("$(find $rootdir/emulatorcores/mednafen-pce-libretro/ -name "*libretro*.so")")
+filelist+=("$(find $rootdir/emulatorcores/imame4all-libretro/ -name "*libretro*.so")")
+filelist+=("$(find $rootdir/emulatorcores/fceu-next/fceumm-code/ -name "*libretro*.so")")
+filelist+=("$(find $rootdir/emulatorcores/fba-libretro/ -name "*libretro*.so")")
+filelist+=("$(find $rootdir/emulatorcores/picodrive/ -name "*libretro*.so")")
 
-filelist+=("./RetroPie/emulators/RetroArch/README.md")
-filelist+=("./RetroPie/emulators/RetroArch/installdir/")
-filelist+=("./RetroPie/emulators/RetroArch/installdir/bin/retroarch")
-filelist+=("./RetroPie/emulators/RetroArch/installdir/bin/retroarch-zip")
-filelist+=("./RetroPie/emulators/RetroArch/installdir/bin/retroarch-joyconfig")
-filelist+=("./RetroPie/emulators/RetroArch/retroarch.cfg")
+filelist+=("$rootdir/emulators/RetroArch/README.md")
+filelist+=("$rootdir/emulators/RetroArch/installdir/")
+filelist+=("$rootdir/emulators/RetroArch/installdir/bin/retroarch")
+filelist+=("$rootdir/emulators/RetroArch/installdir/bin/retroarch-zip")
+filelist+=("$rootdir/emulators/RetroArch/installdir/bin/retroarch-joyconfig")
+filelist+=("$rootdir/emulators/RetroArch/retroarch.cfg")
 
-filelist+=("./RetroPie/emulators/dgen-sdl/dgen")
-filelist+=("./RetroPie/emulators/dgen-sdl/sample.dgenrc")
-filelist+=("./RetroPie/emulators/dgen-sdl/installdir/usr/local/bin/dgen_tobin")
-filelist+=("./RetroPie/emulators/dgen-sdl/installdir/usr/local/bin/dgen")
-filelist+=("./RetroPie/emulators/dgen-sdl/installdir/usr/local/share/man/man1/dgen_tobin.1")
-filelist+=("./RetroPie/emulators/dgen-sdl/installdir/usr/local/share/man/man1/dgen.1")
-filelist+=("./RetroPie/emulators/dgen-sdl/installdir/usr/local/share/man/man5/dgenrc.5")
-filelist+=("./RetroPie/emulators/Wolf4SDL-1.7-src/wolf3d")
-filelist+=("./RetroPie/emulators/osmose-0.8.1+rpi20121122/")
-filelist+=("./RetroPie/emulators/gngeo-pi-0.85/installdir/")
-filelist+=("./RetroPie/emulators/gngeo-pi-0.85/gngeo/FAQ")
-filelist+=("./RetroPie/emulators/gngeo-pi-0.85/gngeo/README")
-filelist+=("./RetroPie/emulators/gngeo-0.7/installdir/")
-filelist+=("./RetroPie/emulators/vice-2.4/installdir/")
-filelist+=("./RetroPie/emulators/uae4rpi/")
-filelist+=("./RetroPie/emulators/advancemame-0.94.0/installdir/")
-filelist+=("./RetroPie/emulators/jzintv-1.0-beta4/")
-filelist+=("./RetroPie/emulators/linapple-src_2a/")
-filelist+=("./RetroPie/emulators/mupen64plus-rpi/")
-filelist+=("./RetroPie/emulators/mame4all-pi/")
-filelist+=("./RetroPie/emulators/mame4all-pi/mame")
-filelist+=("./RetroPie/emulators/rpix86/")
-filelist+=("./RetroPie/emulators/gpsp/raspberrypi/")
-filelist+=("./RetroPie/emulators/snes9x-rpi/snes9x")
-filelist+=("./RetroPie/emulators/pisnes/snes9x")
-filelist+=("./RetroPie/emulators/pisnes/snes9x.gui")
-filelist+=("./RetroPie/emulators/pisnes/zipit")
-filelist+=("./RetroPie/emulators/pifba/")
-filelist+=("./RetroPie/emulators/pisnes/roms/")
-filelist+=("./RetroPie/emulators/pisnes/skins/")
-filelist+=("./RetroPie/emulators/basiliskii/installdir/")
-filelist+=("./RetroPie/emulators/atari800-3.0.0/installdir/")
-filelist+=("./RetroPie/emulators/atari800-3.0.0/README.1ST")
-filelist+=("./RetroPie/emulators/fbzx-2.10.0/")
-filelist+=("./RetroPie/emulators/cpc4rpi-1.1/cpc4rpi")
-filelist+=("./RetroPie/emulators/cpc4rpi-1.1/COPYING.txt")
-filelist+=("./RetroPie/emulators/cpc4rpi-1.1/README.txt")
-filelist+=("./RetroPie/emulators/cpc4rpi-1.1/joy.txt")
+filelist+=("$rootdir/emulators/osmose-0.8.1+rpi20121122/")
+filelist+=("$rootdir/emulators/gngeo-pi-0.85/installdir/")
+filelist+=("$rootdir/emulators/gngeo-pi-0.85/gngeo/FAQ")
+filelist+=("$rootdir/emulators/gngeo-pi-0.85/gngeo/README")
+filelist+=("$rootdir/emulators/vice-2.4/installdir/")
+filelist+=("$rootdir/emulators/uae4rpi/")
+filelist+=("$rootdir/emulators/advancemame-0.94.0/installdir/")
+filelist+=("$rootdir/emulators/jzintv-1.0-beta4/")
+filelist+=("$rootdir/emulators/linapple-src_2a/")
+filelist+=("$rootdir/emulators/mupen64plus-rpi/")
+filelist+=("$rootdir/emulators/mame4all-pi/")
+filelist+=("$rootdir/emulators/mame4all-pi/mame")
+filelist+=("$rootdir/emulators/rpix86/")
+filelist+=("$rootdir/emulators/gpsp/raspberrypi/")
+filelist+=("$rootdir/emulators/snes9x-rpi/snes9x")
+filelist+=("$rootdir/emulators/pisnes/snes9x")
+filelist+=("$rootdir/emulators/pisnes/snes9x.gui")
+filelist+=("$rootdir/emulators/pisnes/zipit")
+filelist+=("$rootdir/emulators/pisnes/roms/")
+filelist+=("$rootdir/emulators/pisnes/skins/")
+filelist+=("$rootdir/emulators/pifba/fba2x")
+filelist+=("$rootdir/emulators/pifba/capex.cfg")
+filelist+=("$rootdir/emulators/pifba/fba2x.cfg")
+filelist+=("$rootdir/emulators/pifba/zipname.fba")
+filelist+=("$rootdir/emulators/pifba/rominfo.fba")
+filelist+=("$rootdir/emulators/pifba/FBACache_windows.zip")
+filelist+=("$rootdir/emulators/pifba/fba_029671_clrmame_dat.zip")
+filelist+=("$rootdir/emulators/pifba/roms")
+filelist+=("$rootdir/emulators/pifba/skin")
+filelist+=("$rootdir/emulators/pifba/preview")
+filelist+=("$rootdir/emulators/basiliskii/BasiliskII/src/Unix/BasiliskII")
+filelist+=("$rootdir/emulators/atari800-3.0.0/installdir/")
+filelist+=("$rootdir/emulators/atari800-3.0.0/README.1ST")
+filelist+=("$rootdir/emulators/fbzx-2.10.0/")
+filelist+=("$rootdir/emulators/cpc4rpi-1.1/cpc4rpi")
+filelist+=("$rootdir/emulators/cpc4rpi-1.1/COPYING.txt")
+filelist+=("$rootdir/emulators/cpc4rpi-1.1/README.txt")
+filelist+=("$rootdir/emulators/cpc4rpi-1.1/joy.txt")
+filelist+=("$rootdir/emulators/openmsx-0.10.0/")
 
 echo "Checking, if all directories/files exist"
 tLen=${#filelist[@]}
@@ -88,14 +89,16 @@ if [[ $doAbort -eq 1 ]]; then
 fi
 
 echo "Creating the archive file"
-tar -c -vf RetroPieSetupBinaries_`date +%d%m%y`.tar ${filelist[0]}
+tar -c -vf /home/pi/RetroPieSetupBinaries_`date +%d%m%y`.tar ${filelist[0]} --exclude-vcs --exclude="*.o"
 
 for (( i=1; i<${tLen}; i++ ));
 do
-	tar -r -vf RetroPieSetupBinaries_`date +%d%m%y`.tar ${filelist[$i]}
+	tar -r -vf /home/pi/RetroPieSetupBinaries_`date +%d%m%y`.tar ${filelist[$i]} --exclude-vcs --exclude="*.o"
 done
 
 echo "Compressing the archive file"
-bzip2 RetroPieSetupBinaries_`date +%d%m%y`.tar
+bzip2 /home/pi/RetroPieSetupBinaries_`date +%d%m%y`.tar
 
 echo "Done."
+
+popd

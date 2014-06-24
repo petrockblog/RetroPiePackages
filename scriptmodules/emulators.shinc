@@ -1,3 +1,28 @@
+# 
+#  (c) Copyright 2012-2014  Florian Müller (contact@petrockblock.com)
+# 
+#  RetroPie-Setup homepage: https://github.com/petrockblog/RetroPie-Setup
+# 
+#  Permission to use, copy, modify and distribute this work in both binary and
+#  source form, for non-commercial purposes, is hereby granted without fee,
+#  providing that this license information and copyright notice appear with
+#  all copies and any derived work.
+# 
+#  This software is provided 'as-is', without any express or implied
+#  warranty. In no event shall the authors be held liable for any damages
+#  arising from the use of this software.
+# 
+#  RetroPie-Setup is freeware for PERSONAL USE only. Commercial users should
+#  seek permission of the copyright holders first. Commercial use includes
+#  charging money for RetroPie-Setup or software derived from RetroPie-Setup.
+# 
+#  The copyright holders request that bug fixes and improvements to the code
+#  should be forwarded to them so everyone can benefit from the modifications
+#  in future versions.
+# 
+#  Many, many thanks go to all people that provide the individual packages!!!
+# 
+
 function sources_retroarch() {
     printMsg "Getting sources of RetroArch"
     gitPullOrClone "$rootdir/emulators/RetroArch" git://github.com/libretro/RetroArch.git
@@ -68,8 +93,8 @@ function configure_retroarch() {
         cp /etc/retroarch.cfg "$rootdir/configs/all/"
     fi
 
-    mkdir -p "$rootdir/BIOS/"
-    ensureKeyValue "system_directory" "$rootdir/BIOS" "$rootdir/configs/all/retroarch.cfg"
+    mkdir -p "$romdir/../BIOS/"
+    ensureKeyValue "system_directory" "$romdir/../BIOS" "$rootdir/configs/all/retroarch.cfg"
     ensureKeyValue "config_save_on_exit" "false" "$rootdir/configs/all/retroarch.cfg"
     ensureKeyValue "video_aspect_ratio" "1.33" "$rootdir/configs/all/retroarch.cfg"
     ensureKeyValue "video_smooth" "false" "$rootdir/configs/all/retroarch.cfg"
@@ -244,7 +269,7 @@ function install_uae4all() {
 }
 
 function configure_uae4all() {
-    mkdir -p "$romroot/amiga"
+    mkdir -p "$romdir/amiga"
 }
 
 function sources_atari800() {
@@ -275,7 +300,7 @@ function install_atari800() {
 }
 
 function configure_atari800() {
-    mkdir -p "$romroot/atari800"
+    mkdir -p "$romdir/atari800"
 }
 
 function sources_cpc() {
@@ -289,22 +314,20 @@ function sources_cpc() {
 }
 
 function build_cpc() {
+    printMsg "Building CPC4RPi"
     pushd "$rootdir/emulators/cpc4rpi-1.1"
     sed -i 's|LIBS = -L/usr/lib/arm-linux-gnueabihf -lz -lts -L/opt/vc/lib -lGLESv2 -lEGL|LIBS = -L/usr/lib/arm-linux-gnueabihf -lX11 -lz -lts -L/opt/vc/lib -lSDL -lpthread -ldl -lGLESv2 -lEGL|g' makefile
     sed -i 's|$(CC) $(CFLAGS) $(IPATHS) -o cpc4rpi cpc4rpi.cpp crtc.o fdc.o psg.o tape.o z80.o /root/Raspbian/Libs/libSDL.a /root/Raspbian/Libs/libnofun.a $(LIBS)|$(CC) $(CFLAGS) $(IPATHS) -o cpc4rpi cpc4rpi.cpp crtc.o fdc.o psg.o tape.o z80.o   $(LIBS)|g' makefile
     make RELEASE=TRUE
-    popd 
-}
-
-function install_cpc() {
-    mv "$rootdir/emulators/cpc4rpi-1.1/cpc4rpi" "$rootdir/emulators/cpc4rpi-1.1/"
     if [[ ! -f "$rootdir/emulators/cpc4rpi-1.1/cpc4rpi" ]]; then
         __ERRMSGS="$__ERRMSGS Could not successfully compile Amstrad CPC emulator CPC4Rpi."
     fi  
+    popd 
 }
 
 function configure_cpc() {
-    mkdir -p "$romroot/armstradcpc"
+    printMsg "Configuring CPC4RPi"
+    mkdir -p "$romdir/armstradcpc"
 }
 
 function install_dosbox() {
@@ -313,7 +336,8 @@ function install_dosbox() {
 }
 
 function configure_dosbox() {
-    mkdir -p "romroot/pc"
+    printMsg "Configuring Dosbox"
+    mkdir -p "$romdir/pc"
 }
 
 function install_stella()
@@ -323,7 +347,7 @@ function install_stella()
 }
 
 function configure_stella() {
-    mkdir -p "romroot/atari2600"
+    mkdir -p "r$omroot/atari2600"
 }
 
 function sources_basilisk() {
@@ -352,7 +376,7 @@ function install_basilisk() {
 
 function configure_basilisk() {
     touch $rootdir/roms/basiliskii/Start.txt
-    mkdir "$romroot/macintosh"
+    mkdir -p "$romdir/macintosh"
 }  
 
 function sources_vice() {
@@ -387,7 +411,7 @@ function install_vice() {
 }
 
 function configure_vice() {
-    mkdir "$romroot/c64"
+    mkdir "$romdir/c64"
 }
 
 function install_c64roms() {
@@ -550,13 +574,13 @@ function sources_osmose() {
     printMsg "Installing Mega Drive/Mastersystem/Game Gear emulator OsmMose"
 
     wget 'https://dl.dropbox.com/s/z6l69wge8q1xq7r/osmose-0.8.1%2Brpi20121122.tar.bz2?dl=1' -O osmose.tar.bz2
-    tar -jxvf osmose.tar.bz2 -C "$scriptdir/emulators/"
+    tar -jxvf osmose.tar.bz2 -C "$rootdir/emulators/"
     rm osmose.tar.bz2
 }
 
 function build_osmose() {
     printMsg "Building Osmose"
-    pushd "$scriptdir/emulators/osmose-0.8.1+rpi20121122/"
+    pushd "$rootdir/emulators/osmose-0.8.1+rpi20121122/"
     make clean
     make
     if [[ ! -f "$rootdir/emulators/osmose-0.8.1+rpi20121122/osmose" ]]; then
@@ -566,8 +590,8 @@ function build_osmose() {
 }
 
 function configure_osmose() {
-    printMsg "Cnfiguring Osmose"
-    mkdir "$romdir/gamegear"    
+    printMsg "Configuring Osmose"
+    mkdir -p "$romdir/gamegear"    
 }
 
 function sources_jzint() {
@@ -671,11 +695,13 @@ function sources_snes9x() {
     if [[ -d "$rootdir/emulators/snes9x-rpi" ]]; then
         rm -rf "$rootdir/emulators/snes9x-rpi"
     fi        
+    apt-get update && apt-get install -y libsdl-dev libboost-thread-dev
     gitPullOrClone "$rootdir/emulators/snes9x-rpi" https://github.com/chep/snes9x-rpi.git
 }
 
 function build_snes9x() {
     printMsg "Building SNES9X-RPi emulator"    
+
     pushd "$rootdir/emulators/snes9x-rpi"
     make clean
     make
@@ -696,10 +722,10 @@ function configure_snes9x() {
 
 function sources_pifba() {
     printMsg "Getting sourecs of PiFBA emulator"    
-    if [[ -d "$scriptdir/emulators/pifba" ]]; then
-        rm -rf "$scriptdir/emulators/pifba"
+    if [[ -d "$rootdir/emulators/pifba" ]]; then
+        rm -rf "$rootdir/emulators/pifba"
     fi  
-    gitPullOrClone "$scriptdir/emulators/pifba" https://code.google.com/p/pifba/
+    gitPullOrClone "$rootdir/emulators/pifba" https://code.google.com/p/pifba/
 }
 
 function build_pifba() {
@@ -712,6 +738,25 @@ function build_pifba() {
         __ERRMSGS="$__ERRMSGS Could not successfully compile PiFBA."
     fi      
     popd
+}
+
+function install_pifba() {
+    printMsg "Installing PiFBA"
+
+    mkdir -p "$rootdir/emulators/pifba/installdir"
+
+    rootdir=/opt/retropie
+    install -m 777 "$rootdir/emulators/pifba/fba2x" "$rootdir/emulators/pifba/installdir/"
+    install -m 777 "$rootdir/emulators/pifba/capex.cfg" "$rootdir/emulators/pifba/installdir/"
+    install -m 777 "$rootdir/emulators/pifba/fba2x.cfg" "$rootdir/emulators/pifba/installdir/"
+    install -m 777 "$rootdir/emulators/pifba/zipname.fba" "$rootdir/emulators/pifba/installdir/"
+    install -m 777 "$rootdir/emulators/pifba/rominfo.fba" "$rootdir/emulators/pifba/installdir/"
+    install -m 777 "$rootdir/emulators/pifba/FBACache_windows.zip" "$rootdir/emulators/pifba/installdir/"
+    install -m 777 "$rootdir/emulators/pifba/fba_029671_clrmame_dat.zip" "$rootdir/emulators/pifba/installdir/"
+    mkdir -p "$rootdir/emulators/pifba/roms"
+    mkdir -p "$rootdir/emulators/pifba/skin"
+    mkdir -p "$rootdir/emulators/pifba/preview"
+    
 }
 
 function configure_pifba() {

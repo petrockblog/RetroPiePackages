@@ -1,5 +1,30 @@
 #!/usr/bin/env bash
 
+# 
+#  (c) Copyright 2012-2014  Florian Müller (contact@petrockblock.com)
+# 
+#  RetroPie-Setup homepage: https://github.com/petrockblog/RetroPie-Setup
+# 
+#  Permission to use, copy, modify and distribute this work in both binary and
+#  source form, for non-commercial purposes, is hereby granted without fee,
+#  providing that this license information and copyright notice appear with
+#  all copies and any derived work.
+# 
+#  This software is provided 'as-is', without any express or implied
+#  warranty. In no event shall the authors be held liable for any damages
+#  arising from the use of this software.
+# 
+#  RetroPie-Setup is freeware for PERSONAL USE only. Commercial users should
+#  seek permission of the copyright holders first. Commercial use includes
+#  charging money for RetroPie-Setup or software derived from RetroPie-Setup.
+# 
+#  The copyright holders request that bug fixes and improvements to the code
+#  should be forwarded to them so everyone can benefit from the modifications
+#  in future versions.
+# 
+#  Many, many thanks go to all people that provide the individual packages!!!
+# 
+
 # global variables ==========================================================
 
 __cmdid=()
@@ -225,7 +250,7 @@ rp_registerFunction "100" "RetroArch                      " "sources_retroarch" 
 rp_registerFunction "101" "AdvMame                        " "sources_advmame"         "build_advmame"           "install_advmame"           "configure_advmame"          ""
 rp_registerFunction "102" "Amiga emulator UAE4All         " "sources_uae4all"         "build_uae4all"           "install_uae4all"           "configure_uae4all"          ""
 rp_registerFunction "103" "Atari 800 emulator             " "sources_atari800"        "build_atari800"          "install_atari800"          "configure_atari800"         ""
-rp_registerFunction "104" "Armstrad CPC emulator          " "sources_cpc"             "build_cpc"               "install_cpc"               "configure_cpc"              ""
+rp_registerFunction "104" "Armstrad CPC emulator          " "sources_cpc"             "build_cpc"               ""                          "configure_cpc"              ""
 rp_registerFunction "105" "DOS Emulator Dosbox            " ""                        ""                        "install_dosbox"            "configure_dosbox"           ""
 rp_registerFunction "106" "Atari2600 emulator STELLA      " ""                        ""                        "install_stella"            "configure_stella"           ""
 rp_registerFunction "107" "Macintosh emulator             " "sources_basilisk"        "build_basilisk"          "install_basilisk"          "configure_basilisk"         ""
@@ -240,8 +265,8 @@ rp_registerFunction "115" "Gamegear emulator Osmose       " "sources_osmose"    
 rp_registerFunction "116" "Intellivision emulator         " "sources_jzint"           "build_jzint"             ""                          "configure_jzint"            ""
 rp_registerFunction "117" "Apple 2 emulator Linapple      " "sources_linapple"        "build_linapple"          ""                          "configure_linapple"         ""
 rp_registerFunction "118" "N64 emulator MUPEN64Plus-RPi   " "sources_mupen64rpi"      "build_mupen64rpi"        ""                          "configure_mupen64rpi"       ""
-rp_registerFunction "119" "SNES emulator SNES9X           " "sources_snes9x"          "build_snes9x"            ""                          "configure_snes9x"           ""
-rp_registerFunction "120" "FBA emulator PiFBA             " "sources_pifba"           "build_pifba"             ""                          "configure_pifba"            ""
+rp_registerFunction "119" "SNES emulator SNES9X-RPi       " "sources_snes9x"          "build_snes9x"            ""                          "configure_snes9x"           ""
+rp_registerFunction "120" "FBA emulator PiFBA             " "sources_pifba"           "build_pifba"             "install_pifba"             "configure_pifba"            ""
 rp_registerFunction "121" "SNES emulator PiSNES           " "sources_pisnes"          "build_pisnes"            ""                          "configure_pisnes"           ""
 rp_registerFunction "122" "DOS Emulator rpix86            " ""                        ""                        "install_rpix86"            "configure_rpix86"           ""
 rp_registerFunction "123" "ScummVM                        " ""                        ""                        "install_scummvm"           ""                           ""
@@ -285,8 +310,11 @@ rp_registerFunction "316" "Set avoid_safe_mode            " ""                  
 rp_registerFunction "317" "Disable system timeouts        " ""                         ""                       "install_disabletimeouts"   ""                           ""
 rp_registerFunction "318" "Handle APT packages            " ""                         ""                       "install_handleaptpackages" ""                           ""
 rp_registerFunction "319" "Auto-start EmulationStation    " ""                         ""                       ""                          "configure_autostartemustat" ""
+rp_registerFunction "320" "Install XBox contr. 360 driver " ""                         ""                       "set_install_xboxdrv"       ""                           ""
+rp_registerFunction "321" "Install PS3 controller driver  " ""                         ""                       "set_installps3controller"  ""                           ""
+rp_registerFunction "322" "Register RetroArch controller  " ""                         ""                       "set_RetroarchJoyconfig"    ""                           ""
 
-# TODO RAM-configuration, python scripts (es-config), download binaries, xbox360 controllers, PS3 controllers, register controller for Retroarch
+# TODO RAM-configuration, python scripts (es-config), download binaries
 
 # ==========================================================================
 # ==========================================================================

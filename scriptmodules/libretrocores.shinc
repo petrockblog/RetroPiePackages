@@ -94,6 +94,7 @@ function build_stellalibretro() {
 }
 
 function configure_stellalibretro() {
+    printMsg "Configuring stellalibretro"
     mkdir -p $romdir/atari2600
 }
 
