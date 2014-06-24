@@ -1,39 +1,3 @@
-# Picodrive -----------------------------
-
-function sources_picodrive() {
-    printMsg "Getting sources for Megadrive core Picodrive"
-    gitPullOrClone "$rootdir/emulatorcores/picodrive" https://github.com/libretro/picodrive.git
-    pushd "$rootdir/emulatorcores/picodrive"
-    git submodule init && git submodule update
-    popd
-}
-
-function build_picodrive() {
-    printMsg "Building Megadrive core picodrive"
-    pushd "$rootdir/emulatorcores/picodrive"
-    make clean
-    make -f Makefile.libretro platform=armv6    
-    if [[ ! -f `find $rootdir/emulatorcores/picodrive/ -name "*libretro*.so"` ]]; then
-        __ERRMSGS="$__ERRMSGS Could not successfully compile Genesis core Picodrive."
-    fi
-    popd
-}
-
-function install_picodrive() {
-    printMsg "Installing Megadrive core picodrive"
-}
-
-function configure_picodrive() {
-    printMsg "Configuring Megadrive core picodrive"
-    mkdir -p $home/RetroPie/roms/megadrive
-    mkdir -p $romdir/segacd
-    mkdir -p $romdir/sega32x
-}
-
-function package_picodrive() {
-    printMsg "Building package for Megadrive core picodrive"
-}
-
 # SNES emulator Pocketsnes -------------------------------------------------
 function sources_pocketsnes() {
     printMsg "Getting sources for Pocketsnes"
@@ -75,6 +39,42 @@ function configure_pocketsnes() {
 
 function package_pocketsnes() {
     printMsg "Building package for Pocketsnes"
+}
+
+# Picodrive -----------------------------
+
+function sources_picodrive() {
+    printMsg "Getting sources for Megadrive core Picodrive"
+    gitPullOrClone "$rootdir/emulatorcores/picodrive" https://github.com/libretro/picodrive.git
+    pushd "$rootdir/emulatorcores/picodrive"
+    git submodule init && git submodule update
+    popd
+}
+
+function build_picodrive() {
+    printMsg "Building Megadrive core picodrive"
+    pushd "$rootdir/emulatorcores/picodrive"
+    make clean
+    make -f Makefile.libretro platform=armv6    
+    if [[ ! -f `find $rootdir/emulatorcores/picodrive/ -name "*libretro*.so"` ]]; then
+        __ERRMSGS="$__ERRMSGS Could not successfully compile Genesis core Picodrive."
+    fi
+    popd
+}
+
+function install_picodrive() {
+    printMsg "Installing Megadrive core picodrive"
+}
+
+function configure_picodrive() {
+    printMsg "Configuring Megadrive core picodrive"
+    mkdir -p $home/RetroPie/roms/megadrive
+    mkdir -p $romdir/segacd
+    mkdir -p $romdir/sega32x
+}
+
+function package_picodrive() {
+    printMsg "Building package for Megadrive core picodrive"
 }
 
 function sources_stellalibretro() {
@@ -212,10 +212,14 @@ function configure_mamelibretro() {
     mkdir -p $romdir/mame
 }
 
+function depen_fbalibretro() {
+    printMsg "Getting dependencies for fbalibretro"
+    apt-get update && apt-get install -y --force-yes cpp-4.5 gcc-4.5 g++-4.5    
+}
+
 function sources_fbalibretro() {
     printMsg "Getting sources of fbalibretro"
     gitPullOrClone "$rootdir/emulatorcores/fba-libretro" git://github.com/libretro/fba-libretro.git
-    apt-get install -y --force-yes cpp-4.5 gcc-4.5 g++-4.5
 }
 
 function build_fbalibretro() {

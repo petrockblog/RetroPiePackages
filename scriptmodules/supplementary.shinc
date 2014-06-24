@@ -58,13 +58,17 @@ _EOF_
 
 # 302, SDL 2.0.1
 
+function depen_sdl() {
+    printMsg "Getting depencies of sdl"
+    apt-get install -y libudev-dev libasound2-dev libdbus-1-dev libraspberrypi0 libraspberrypi-bin libraspberrypi-dev    
+}
+
 function sources_sdl() {
     printMsg "Getting sources of SDL 2.0.1"
 
     # These packages are listed in SDL2's "README-raspberrypi.txt" file as build dependencies.
     # If libudev-dev is not installed before compiling, the keyboard will mysteriously not work!
     # The rest should already be installed, but just to be safe, include them all.
-    apt-get install -y libudev-dev libasound2-dev libdbus-1-dev libraspberrypi0 libraspberrypi-bin libraspberrypi-dev
 
     wget http://libsdl.org/release/SDL2-2.0.1.tar.gz
     mkdir -p "$rootdir/supplementary/"
@@ -87,14 +91,15 @@ function install_sdl() {
 
 
 # 303, Emulation Station ----------------------
+function depen_emulationstation() {
+    printMsg "Getting dependencies for emulationstation"
+    apt-get install -y libboost-system-dev libboost-filesystem-dev libboost-date-time-dev \
+                       libfreeimage-dev libfreetype6-dev libeigen3-dev libcurl4-openssl-dev \
+                       libasound2-dev cmake g++-4.7    
+}
 
 function sources_EmulationStation() {
 	printMsg "Getting sources of EmulationStation"
-
-    apt-get install -y libboost-system-dev libboost-filesystem-dev libboost-date-time-dev \
-                       libfreeimage-dev libfreetype6-dev libeigen3-dev libcurl4-openssl-dev \
-                       libasound2-dev cmake g++-4.7
-
 	# sourced of EmulationStation
 	gitPullOrClone "$rootdir/supplementary/EmulationStation" "https://github.com/Aloshi/EmulationStation" || return 1
 	pushd "$rootdir/supplementary/EmulationStation" || return 1
@@ -531,6 +536,10 @@ function install_runcommand() {
     mkdir -p "$rootdir/supplementary/runcommand/"
     cp $scriptdir/supplementary/runcommand.sh "$rootdir/supplementary/runcommand/"
     chmod +x "$rootdir/supplementary/runcommand/runcommand.sh"
+}
+
+function depen_snesdev() {
+
 }
 
 function sources_snesdev() {

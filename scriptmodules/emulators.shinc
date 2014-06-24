@@ -183,10 +183,13 @@ function package_retroarch() {
 }
 
 # 101, AdvMAME
+function depen_advmame() {
+    printMsg "Getting dependencies of advmame"
+    apt-get -y install libsdl1.2-dev gcc-4.7
+}
+
 function sources_advmame() {
     printMsg "Getting sources of AdvMAME"
-
-    apt-get -y install libsdl1.2-dev gcc-4.7
     wget -O advmame.tar.gz http://downloads.sourceforge.net/project/advancemame/advancemame/0.94.0/advancemame-0.94.0.tar.gz
 }
 
@@ -539,7 +542,7 @@ function configure_gngeopi() {
 
 function install_hatari() {
     printMsg "Installing Hatari"
-   apt-get install -y hatari    
+    apt-get install -y hatari    
 }
 
 function sources_mame4all() {
@@ -690,12 +693,15 @@ function configure_mupen64rpi() {
     mkdir -p "$romdir/n64"
 }
 
+function depen_snes9x() {
+    apt-get update && apt-get install -y libsdl-dev libboost-thread-dev
+}
+
 function sources_snes9x() {
     printMsg "Getting sources of SNES9X-RPi emulator"    
     if [[ -d "$rootdir/emulators/snes9x-rpi" ]]; then
         rm -rf "$rootdir/emulators/snes9x-rpi"
     fi        
-    apt-get update && apt-get install -y libsdl-dev libboost-thread-dev
     gitPullOrClone "$rootdir/emulators/snes9x-rpi" https://github.com/chep/snes9x-rpi.git
 }
 
@@ -745,7 +751,6 @@ function install_pifba() {
 
     mkdir -p "$rootdir/emulators/pifba/installdir"
 
-    rootdir=/opt/retropie
     install -m 777 "$rootdir/emulators/pifba/fba2x" "$rootdir/emulators/pifba/installdir/"
     install -m 777 "$rootdir/emulators/pifba/capex.cfg" "$rootdir/emulators/pifba/installdir/"
     install -m 777 "$rootdir/emulators/pifba/fba2x.cfg" "$rootdir/emulators/pifba/installdir/"
@@ -881,10 +886,14 @@ function configure_fbzx() {
     mkdir -p $romdir/zxspectrum
 }
 
+function depen_msx() {
+    printMsg "Getting dependencies of msx"
+    apt-get update && apt-get install -y libsdl1.2-dev libsdl-ttf2.0-dev libglew-dev libao-dev libogg-dev libtheora-dev libxml2-dev libvorbis-dev tcl-dev    
+}
+
 function sources_openmsx() {
     printMsg "Getting sources of openmsx"
 
-    apt-get install -y libsdl1.2-dev libsdl-ttf2.0-dev libglew-dev libao-dev libogg-dev libtheora-dev libxml2-dev libvorbis-dev tcl-dev
     wget http://downloads.sourceforge.net/project/openmsx/openmsx/0.10.0/openmsx-0.10.0.tar.gz
     tar xvfz openmsx-0.10.0.tar.gz  -C "$rootdir/emulators"
     rm openmsx-0.10.0.tar.gz
@@ -903,6 +912,35 @@ function configure_openmsx() {
     mkdir -p $romdir/msx
 }
 
+function sources_fastdosbox() {
+    printMsg "Getting sources of fastdosbox"
+    wget http://gaming.capsule-sa.co.za/downloads/fastdosbox-1.5_src.tar.gz
+    tar xvfz fastdosbox-1.5_src.tar.gz -C "$rootdir/emulators/"
+
+    # patch sources
+    sed -i 's|#include "nofun.h"|//#include "nofun.h"|g' "$rootdir/emulators/fastdosbox-1.5/src/gui/sdl_mapper.cpp"
+
+    mkdir -p $rootdir/emulators/fastdosbox-1.5/installdir
+    rm fastdosbox-1.5_src.tar.gz
+}
+
+function build_fastdosbox() {
+    printMsg "Building fastdosbox"
+    pushd $rootdir/emulators/fastdosbox-1.5
+    ./configure --prefix=$rootdir/emulators/fastdosbox-1.5/installdir
+    make
+    popd
+}
+
+function install_fastdosbox() {
+    printMsg "Installing fastdosbox"
+    pushd $rootdir/emulators/fastdosbox-1.5
+    make install
+    if [[ ! -f $rootdir/emulators/fastdosbox-1.5/installdir/bin/dosbox ]]; then
+        __ERRMSGS="$__ERRMSGS Could not successfully install FastDosbox."
+    fi
+    popd
+}
 
 # --------------------------
 
