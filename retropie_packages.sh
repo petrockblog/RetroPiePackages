@@ -38,6 +38,10 @@ __package=()
 __doPackages=0
 
 rootdir="/opt/retropie"
+romdir="$home/RetroPie/roms"
+if [[ ! -d $romdir ]]; then
+    mkdir -p $romdir
+fi
 
 __ERRMSGS=""
 __INFMSGS=""
@@ -169,12 +173,12 @@ function rps_availFreeDiskSpace() {
 function rp_registerFunction() {
 	__cmdid+=($1)
 	__description[$1]=$2
-    __dependencies[$1]=$2
-	__sources[$1]=$3
-	__build[$1]=$4
-	__install[$1]=$5
-	__configure[$1]=$6
-	__package[$1]=$7
+    __dependencies[$1]=$3
+	__sources[$1]=$4
+	__build[$1]=$5
+	__install[$1]=$6
+	__configure[$1]=$7
+	__package[$1]=$8
 }
 
 function rp_listFunctions() {
@@ -185,7 +189,8 @@ function rp_listFunctions() {
 	for (( i = 0; i < ${#__cmdid[@]}; i++ )); do
 		id=${__cmdid[$i]};
 		echo -e "$id:\t${__description[$id]}:\t\c"
-		fn_exists ${__sources[$id]} && echo -e "sources \c"
+        fn_exists ${__dependencies[$id]} && echo -e "dependencies \c"
+        fn_exists ${__sources[$id]} && echo -e "sources \c"
 		fn_exists ${__build[$id]} && echo -e "build \c"
 		fn_exists ${__install[$id]} && echo -e "install \c"
 		fn_exists ${__configure[$id]} && echo -e "configure \c"
@@ -226,10 +231,6 @@ script_name=`basename "$0"`
 getScriptAbsoluteDir "$script_invoke_path"
 script_absolute_dir=$RESULT
 home=$(eval echo ~$user)
-romdir="$home/RetroPie/roms"
-if [[ ! -d $romdir ]]; then
-    mkdir -p $romdir
-fi
 
 import "scriptmodules/helpers"
 import "scriptmodules/emulators"
@@ -313,8 +314,10 @@ rp_registerFunction "319" "Auto-start EmulationStation    " ""                  
 rp_registerFunction "320" "Install XBox contr. 360 driver " ""                       ""                         ""                       "set_install_xboxdrv"       ""                           ""
 rp_registerFunction "321" "Install PS3 controller driver  " ""                       ""                         ""                       "set_installps3controller"  ""                           ""
 rp_registerFunction "322" "Register RetroArch controller  " ""                       ""                         ""                       "set_RetroarchJoyconfig"    ""                           ""
+rp_registerFunction "323" "Install SDL 2.0.1 binaries     " ""                       ""                         ""                       "install_libsdlbinaries"    ""                           "" 
+rp_registerFunction "324" "Configure audio settings       " ""                       ""                         ""                       ""                          "configure_audiosettings"    "" 
 
-# TODO RAM-configuration, python scripts (es-config), download binaries
+# TODO python scripts (es-config)
 
 # ==========================================================================
 # ==========================================================================
@@ -329,7 +332,7 @@ if [[ $# -eq 1 ]]; then
 	fn_exists ${__build[$id]} && ${__build[$id]}
 	fn_exists ${__install[$id]} && ${__install[$id]}
 	fn_exists ${__configure[$id]} && ${__configure[$id]}
-	fn_exists ${__package[$id]} && ${__package[$id]}
+	# fn_exists ${__package[$id]} && ${__package[$id]} packages are not built automatically
 elif [[ $# -eq 2 ]]; then
     ensureRootdirExists
     id=$1

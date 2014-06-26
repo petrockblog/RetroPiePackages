@@ -1,15 +1,12 @@
-#! /bin/sh
-### BEGIN INIT INFO
-# Provides:          asplashscreen
-# Required-Start:
-# Required-Stop:
-# Should-Start:      
-# Default-Start:     S
-# Default-Stop:
-# Short-Description: Show custom splashscreen
-# Description:       Show custom splashscreen
+## BEGIN INIT INFO
+# Provides: asplashscreen
+# Required-Start: $local_fs
+# Required-Stop: $local_fs
+# Default-Start: 2 3 4 5
 ### END INIT INFO
 
+#! /bin/sh
+# /etc/init.d/asplashscreen
 
 do_start () {
 
@@ -42,5 +39,4 @@ case "$1" in
     exit 3
     ;;
 esac
-
-:
+exit 0

@@ -479,7 +479,7 @@ function configure_EmulationStation() {
 
 </systemList>
 _EOF_
-chmod +x 755 "/etc/emulationstation/es_systems.cfg"
+chmod 755 "/etc/emulationstation/es_systems.cfg"
 	
 }
 
@@ -525,9 +525,12 @@ function package_EmulationStation() {
 # 304, install_ESThemeSimple
 function install_ESThemeSimple() {
     printMsg "Installing EmulationStation theme 'Simple'"
-    wget -O themesDownload.zip http://blog.petrockblock.com/?wpdmdl=8033
-    unzip themesDownload.zip -d "/etc/emulationstation/"
-    rm themesDownload.zip
+    wget -O themesDownload.tar.bz2 http://blog.petrockblock.com/?wpdmdl=8033
+
+    tar xvfj themesDownload.tar.bz2
+    rm themesDownload.tar.bz2
+    mv -f simple/ /etc/emulationstation/themes/
+
     chmod -R 755 "/etc/emulationstation/themes/"
 }
 
@@ -536,10 +539,6 @@ function install_runcommand() {
     mkdir -p "$rootdir/supplementary/runcommand/"
     cp $scriptdir/supplementary/runcommand.sh "$rootdir/supplementary/runcommand/"
     chmod +x "$rootdir/supplementary/runcommand/runcommand.sh"
-}
-
-function depen_snesdev() {
-
 }
 
 function sources_snesdev() {
@@ -807,13 +806,16 @@ function set_enableSplashscreenAtStart()
 
     apt-get install -y fbi
 
-    chmod +x "$scriptdir/supplementary/asplashscreen/asplashscreen"
-    cp "$scriptdir/supplementary/asplashscreen/asplashscreen" /etc/init.d/
+    chmod 755 "$scriptdir/supplementary/asplashscreen/asplashscreen"
+    cp "$scriptdir/supplementary/asplashscreen/asplashscreen" "/etc/init.d/"
 
     echo $(find $scriptdir/supplementary/splashscreens/retropieproject2014/ -type f) > /etc/splashscreen.list
 
     # This command installs the init.d script so it automatically starts on boot
     insserv /etc/init.d/asplashscreen
+    
+    update-rc.d asplashscreen defaults
+
     # not-so-elegant hack for later re-enabling the splashscreen
     update-rc.d asplashscreen enable
 
@@ -1075,7 +1077,7 @@ function install_handleaptpackages() {
     printMsg "Handling APT packages"
 
     # remove PulseAudio since this is slowing down the whole system significantly. Cups is also not needed
-    apt-get remove -y pulseaudio cups
+    apt-get remove -y pulseaudio cups wolfram-engine
     apt-get -y autoremove    
 }
 
@@ -1169,6 +1171,52 @@ function set_RetroarchJoyconfig() {
     mv $rootdir/emulators/RetroArch/configs/tempconfig.cfg $rootdir/emulators/RetroArch/configs/$configfname.cfg
     chown $user:$user $rootdir/emulators/RetroArch/configs/
     dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --msgbox "The configuration file has been saved as $configfname.cfg and will be used by RetroArch from now on whenever that controller is connected." 22 76    
+}
+
+function install_libsdlbinaries() {
+    printMsg "Downloading and installing SDL 2.0.1 binaries"
+    apt-get install -y libudev-dev libasound2-dev libdbus-1-dev libraspberrypi0 libraspberrypi-bin libraspberrypi-dev    
+
+    wget -O libsdlbinaries.tar.gz http://downloads.petrockblock.com/libsdl2.0.1.tar.gz
+    tar xvfz libsdlbinaries.tar.gz
+    rm libsdlbinaries.tar.gz
+    cp libsdl2.0.1/* /usr/local/lib/
+    rm -rf libsdl2.0.1/
+}
+
+function configure_audiosettings() {
+    cmd=(dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --menu "Set audio output." 22 86 16)
+    options=(1 "Auto"
+             2 "Headphones - 3.5mm jack"
+             3 "HDMI"
+             4 "Reset to default")
+    choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
+    if [ "$choices" != "" ]; then
+        case $choices in
+            1) amixer cset numid=3 0
+               alsactl store
+               ###set
+               dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --msgbox "Set audio output to auto" 22 76    
+                            ;;
+            2) amixer cset numid=3 1
+               alsactl store
+               ###set
+               dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --msgbox "Set audio output to headphones / 3.5mm jack " 22 76    
+                            ;;
+            3) amixer cset numid=3 2
+               alsactl store
+               ###set
+               dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --msgbox "Set audio output to HDMI" 22 76    
+                            ;;
+            4) /etc/init.d/alsa-utils reset
+               alsactl store
+                 ###set
+               dialog --backtitle "PetRockBlock.com - RetroPie Setup. Installation folder: $rootdir for user $user" --msgbox "Audio settings reset to defaults" 22 76    
+                            ;;
+        esac
+    else
+        break
+    fi        
 }
 
 # --------------------------------------
